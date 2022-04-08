@@ -1,0 +1,105 @@
+{
+  "rki_incidence" : {
+    "mappings" : {
+      "properties" : {
+        "abbreviation" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "ags" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "cases" : {
+          "type" : "long"
+        },
+        "casesPer100k" : {
+          "type" : "float"
+        },
+        "casesPerWeek" : {
+          "type" : "long"
+        },
+        "county" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "data_request_time" : {
+          "type" : "date"
+        },
+        "deaths" : {
+          "type" : "long"
+        },
+        "deathsPerWeek" : {
+          "type" : "long"
+        },
+        "delta" : {
+          "properties" : {
+            "cases" : {
+              "type" : "long"
+            },
+            "deaths" : {
+              "type" : "long"
+            },
+            "recovered" : {
+              "type" : "long"
+            }
+          }
+        },
+        "id" : {
+          "type" : "long"
+        },
+        "name" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "population" : {
+          "type" : "long"
+        },
+        "recovered" : {
+          "type" : "long"
+        },
+        "state" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "stateAbbreviation" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "weekIncidence" : {
+          "type" : "float"
+        }
+      }
+    }
+  }
+}

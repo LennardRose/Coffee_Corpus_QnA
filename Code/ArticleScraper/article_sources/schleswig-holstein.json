@@ -1,0 +1,53 @@
+{
+    "region": "schleswig_holstein",
+    "site_name": "schleswig_holsteiner_zeitungsverlag",
+    "base_url": "https://www.shz.de/",
+    "path_url": "suche/?q=corona",
+    "html_tag": "article",
+    "html_class": "teaser",
+    "url_conditions" : [
+        {
+        "condition_string": "/schleswig-holstein",
+        "include_condition": true}
+        ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "date"
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

@@ -1,0 +1,53 @@
+{
+    "region": "sachsen_anhalt",
+    "site_name": "volksstimme",
+    "base_url": "https://www.volksstimme.de/",
+    "path_url": "search?q=corona",
+    "html_tag": "a",
+    "html_class": "fp-article-list",
+    "url_conditions" : [
+        {
+        "condition_string": "/lokal|sachsen-anhalt",
+        "include_condition": true}
+        ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "JSON_LD",
+        "tag": "datePublished",
+        "attribute" : null,
+        "attribute_value": null
+    },
+    "author": {
+        "source": "JSON_LD",
+        "tag": "author",
+        "attribute" : null,
+        "attribute_value": null,
+        "default": null
+    },
+    "description": {
+        "source": "JSON_LD",
+        "tag": "descripton",
+        "attribute" : null,
+        "attribute_value": null,
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

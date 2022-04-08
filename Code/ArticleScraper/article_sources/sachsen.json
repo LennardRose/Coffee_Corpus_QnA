@@ -1,0 +1,53 @@
+{
+    "region": "sachsen",
+    "site_name": "saechsische_zeitung",
+    "base_url": "https://www.saechsische.de/",
+    "path_url": "search?q=corona",
+    "html_tag": "h3",
+    "html_class": "article-vbox__headline",
+    "url_conditions" : [
+        {
+        "condition_string": "sachsen",
+        "include_condition": true}
+        	],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "JSON_LD",
+        "tag": "datePublished",
+        "attribute" : null,
+        "attribute_value": null
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "div",
+        "attribute" : "class",
+        "attribute_value": "article-author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "NOEXIST",
+        "tag": null,
+        "attribute" : null,
+        "attribute_value": null,
+        "default": null
+    }
+} 

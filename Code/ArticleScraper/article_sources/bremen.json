@@ -1,0 +1,49 @@
+{
+    "region": "bremen",
+    "site_name": "buten_und_binnen",
+    "base_url": "https://www.butenunbinnen.de/",
+    "path_url": "nachrichten/schwerpunkt-corona-virus-106.html",
+    "html_tag": "a",
+    "html_class": "-teaser-link-content",
+    "url_conditions" : null,
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "DCTERMS.created"
+    },
+    "author": {
+        "source": "DEFAULT",
+        "tag": null,
+        "attribute" : null,
+        "attribute_value": null,
+        "default": "buten_und_binnen"
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

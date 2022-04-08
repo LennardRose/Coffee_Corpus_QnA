@@ -1,0 +1,53 @@
+{
+    "region": "worldwide",
+    "site_name": "welt",
+    "base_url": "https://www.welt.de/",
+    "path_url": "themen/coronavirus-epidemie/",
+    "html_tag": "a",
+    "html_class": "o-teaser__link",
+    "url_conditions" : [
+        {
+        "condition_string": "/live",
+        "include_condition": false}
+        	],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "date"
+    },
+    "author": {
+        "source": "JSON_LD",
+        "tag": "author",
+        "attribute" : "data-qa",
+        "attribute_value": "StructuredData",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

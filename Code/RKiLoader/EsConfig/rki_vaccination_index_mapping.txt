@@ -1,0 +1,152 @@
+{
+  "mappings": {
+    "properties": {
+      "administeredVaccinations": {
+        "type": "long"
+      },
+      "data_request_time": {
+        "type": "date"
+      },
+      "delta": {
+        "type": "long"
+      },
+      "indication": {
+        "properties": {
+          "age": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "job": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "medical": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "nursingHome": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "secondVaccination": {
+            "properties": {
+              "age": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "job": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "medical": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "nursingHome": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "quote": {
+        "type": "float"
+      },
+      "secondVaccination": {
+        "properties": {
+          "delta": {
+            "type": "long"
+          },
+          "quote": {
+            "type": "float"
+          },
+          "vaccinated": {
+            "type": "long"
+          },
+          "vaccination": {
+            "properties": {
+              "astraZeneca": {
+                "type": "long"
+              },
+              "biontech": {
+                "type": "long"
+              },
+              "janssen": {
+                "type": "long"
+              },
+              "moderna": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      },
+      "vaccinated": {
+        "type": "long"
+      },
+      "vaccination": {
+        "properties": {
+          "astraZeneca": {
+            "type": "long"
+          },
+          "biontech": {
+            "type": "long"
+          },
+          "moderna": {
+            "type": "long"
+          }
+        }
+      }
+    }
+  }
+}

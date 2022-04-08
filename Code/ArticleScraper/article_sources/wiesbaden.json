@@ -1,0 +1,53 @@
+{
+    "region": "wiesbaden",
+    "site_name": "wiesbadener_kurier",
+    "base_url": "https://www.wiesbadener-kurier.de/",
+    "path_url": "dossiers/coronavirus",
+    "html_tag": "a",
+    "html_class": "vrm-article__titleLink",
+    "url_conditions" : [
+        {
+        "condition_string": "/wiesbaden",
+        "include_condition": true}
+        ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "article:published_time"
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

@@ -1,0 +1,53 @@
+{
+    "region": "saarbruecken",
+    "site_name": "saarbrueckener_zeitung",
+    "base_url": "https://www.saarbruecker-zeitung.de/",
+    "path_url": "suche/corona/",
+    "html_tag": "a",
+    "html_class": "park-teaser__link",
+    "url_conditions" : [
+        {
+        "condition_string": "/saarbruecken",
+        "include_condition": true}
+        ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "date"
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

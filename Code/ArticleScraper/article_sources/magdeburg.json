@@ -1,0 +1,49 @@
+{
+    "region": "magedeburg",
+    "site_name": "kompakt_media",
+    "base_url": "https://www.kompakt.media/",
+    "path_url": "coronavirus-magdeburg-aktuell/",
+    "html_tag": "h2",
+    "html_class": "entry-title",
+    "url_conditions" : null,
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "published_time"
+    },
+    "author": {
+        "source": "NOEXIST",
+        "tag": null,
+        "attribute" : null,
+        "attribute_value": null,
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

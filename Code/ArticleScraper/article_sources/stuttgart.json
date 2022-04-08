@@ -1,0 +1,54 @@
+{
+    "region": "stuttgart",
+    "site_name": "stuttgarter_zeitung",
+    "base_url": "https://www.stuttgarter-zeitung.de",
+    "path_url": "/thema/Coronavirus",
+    "html_tag": "a",
+    "html_class": "data",
+    "url_conditions" : [
+        {
+        "condition_string": "/inhalt.",
+        "include_condition": true
+        }    
+    ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "JSON_LD",
+        "tag": "datePublished",
+        "attribute" : null,
+        "attribute_value": null
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 

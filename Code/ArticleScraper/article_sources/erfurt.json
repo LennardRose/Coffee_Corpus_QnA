@@ -1,0 +1,53 @@
+{
+    "region": "erfurt",
+    "site_name": "thueringische_landeszeitung",
+    "base_url": "https://www.tlz.de/",
+    "path_url": "suche/?q=corona",
+    "html_tag": "article",
+    "html_class": "teaser",
+    "url_conditions" : [
+        {
+        "condition_string": "erfurt",
+        "include_condition": true}
+        ],
+    "title": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:title"
+    },
+    "date": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "DC.date.issued"
+    },
+    "author": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "author",
+        "default": null
+    },
+    "description": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:description",
+        "default": null
+    },
+    "type": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "property",
+        "attribute_value": "og:type",
+        "default": null
+    },
+    "keywords": {
+        "source": "TAG",
+        "tag": "meta",
+        "attribute" : "name",
+        "attribute_value": "keywords",
+        "default": null
+    }
+} 
