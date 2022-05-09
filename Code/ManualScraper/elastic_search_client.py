@@ -33,9 +33,9 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
         initializes needed indizes if not already there
         """
-        if not self.es_client.indices.exists(index="article_config"):
-            logging.info("Index article_config not found, initialize index.")
-            self.es_client.indices.create(index="article_config")
+        if not self.es_client.indices.exists(index="manual_config"):
+            logging.info("Index manual_config not found, initialize index.")
+            self.es_client.indices.create(index="manual_config")
 
         if not self.es_client.indices.exists(index="article_meta_data"):
             logging.info("Index article_meta_data not found, initialize index.")
@@ -57,7 +57,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
 
         query = {"query":{ "match": { "_id" : { "query" : id } } } }
-        docs = self.es_client.search(index="article_config", body=query)
+        docs = self.es_client.search(index="manual_config", body=query)
         if docs["hits"]["hits"]:
             return docs["hits"]["hits"][0]["_source"]
         else:
@@ -72,7 +72,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
 
         query = {"size" : 1000,"query": {"match_all" : {}}}
-        docs = self.es_client.search(index="article_config", body = query)
+        docs = self.es_client.search(index="manual_config", body = query)
         result = []
         for doc in docs["hits"]["hits"]:
             result.append(doc["_source"])
