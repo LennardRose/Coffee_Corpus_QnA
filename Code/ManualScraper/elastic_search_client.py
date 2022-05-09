@@ -37,16 +37,16 @@ class ElasticSearchClient(MetaClient, ArticleClient):
             logging.info("Index manual_config not found, initialize index.")
             self.es_client.indices.create(index="manual_config")
 
-        if not self.es_client.indices.exists(index="article_meta_data"):
-            logging.info("Index article_meta_data not found, initialize index.")
-            self.es_client.indices.create(index="article_meta_data", body=self._get_article_meta_data_mapping())
+        if not self.es_client.indices.exists(index="manual_meta_data"):
+            logging.info("Index manual_meta_data not found, initialize index.")
+            self.es_client.indices.create(index="manual_meta_data", body=self._get_article_meta_data_mapping())
 
 
     def delete_meta_data(self, id):
         """
-        deletes meta_data doc in article_meta_data index
+        deletes meta_data doc in manual_meta_data index
         """
-        self.es_client.delete(index="article_meta_data", id=id)
+        self.es_client.delete(index="manual_meta_data", id=id)
             
 
     def get_article_config(self, id):
@@ -86,7 +86,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         :return: the id of the new indexed meta data
         """
 
-        result = self.es_client.index(index="article_meta_data", body=metadata_json,
+        result = self.es_client.index(index="manual_meta_data", body=metadata_json,
                              doc_type="_doc")
 
         if result["result"] == "created" and result["_id"]:
@@ -102,7 +102,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         searches for the latest entries url of the given website, number of returned entries defined in config
         latest means  index time 
         :param source_URL: the URL of the site we are looking for the latest entry
-        :returns: the url of the latest entries in the article_meta_data index with the matching source_URL
+        :returns: the url of the latest entries in the manual_meta_data index with the matching source_URL
         """
         try:
             result = []
@@ -120,7 +120,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
                     "sort" : [{"index_time": {"order": "desc" } } ],
                     "size": utils.config["RECENT_ARTICLE_COUNT"]
                     }
-            docs = self.es_client.search(index="article_meta_data", body = query)
+            docs = self.es_client.search(index="manual_meta_data", body = query)
 
             for doc in docs["hits"]["hits"]:
                 result.append(doc["_source"]["url"])
@@ -135,7 +135,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
         query = { "query" :  { "bool" : { "must" : [ {"match_phrase": { "source_url": { "query" : source_URL } } } ], "filter" : { "match_phrase": { "url": { "query" : URL } } } } } } 
 
-        hits = self.es_client.search(index="article_meta_data", body = query)
+        hits = self.es_client.search(index="manual_meta_data", body = query)
         
         if hits["hits"]["total"]["value"] > 0:
             return True
@@ -145,7 +145,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
 
     def _get_article_meta_data_mapping(self):
         """
-        :return: the article_meta_data index mapping 
+        :return: the manual_meta_data index mapping
         """
         return { "mappings": {
         "properties": {

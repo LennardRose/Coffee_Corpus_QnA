@@ -41,7 +41,7 @@ class meta_parser:
 
     def get_article_meta_data(self):
         """
-        returns the article_meta_data
+        returns the manual_meta_data
         """
         return self.article_meta_data
 

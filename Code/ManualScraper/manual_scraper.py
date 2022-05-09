@@ -18,11 +18,13 @@ import client_factory
 import logging
 import ssl
 import os
+from queue import Queue
 
 
 class ManualScraper:
 
     def __init__(self):
+        self.manual_config = None
         ssl._create_default_https_context = ssl._create_unverified_context
         self.driver = self._get_webdriver()
 
@@ -46,78 +48,82 @@ class ManualScraper:
                 return webdriver.Chrome(executable_path=path, options=driver_options)
 
         except Exception as e:
-            logging.error(
-                "failed to initialize webdriver for selenium, make sure you downloaded a driver and wrote the correct path to config, current path: " + path)
+            logging.error("failed to initialize webdriver for selenium, /"
+                          "make sure you downloaded a driver and wrote the correct path to config, current path: " + path)
             logging.error(e)
 
 
     def scrape(self, manual_config):
         """
         makes sure necessary properties are set in the manual_config
-        saves all of the pages valid article_links content
         """
+        self.manual_config = manual_config
+
         if manual_config["base_url"] == None:
             logging.error("Missing url information to scrape from manual_config")
 
         else:
+            logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"])
 
-            for path in manual_config["paths"]:
+            links = Queue()
+            map(links.put, manual_config["paths"])
 
-                logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"] + path["path_url"])
+            # TODO Hier muss noch iteriervorgang hin
+            map(links.put, self._get_layer_links(links.get(block=False)))
 
-                for next_layer_links in self.get_layer_links(manual_config["base_url"] + path["path_url"]):
-                    self._save_page(manual_config, next_layer_links)
+            self._save_manuals(links)
 
-        """                if path["html_tag"] == None and manual_config["html_class"] == None:
-                    logging.error("Missing html information to scrape from manual_config: %s",
-                                  manual_config["base_url"] + manual_config["path_url"])"""
+        self.manual_config = None
 
 
-    def _save_page(self, article_config, URL):
+    def _save_manuals(self, URLs):
         """
         retrieves content of the article page
         parses meta information
         saves all data
         """
-        try:
-            logging.info("Save content of: " + URL)
+        for URL in URLs:
+            try:
+                logging.info("Save content of: " + URL)
 
-            soup = self._get_soup(URL)
-            content = self._get_text_content(soup)
+                for element in self._get_link_list(URL,
+                                                   html_tag=self.manual_config["pdf"]["html_tag"],
+                                                   html_class=self.manual_config["pdf"]["html_class"],
+                                                   css_selector=self.manual_config["pdf"]["css_selector"]):
+                    # save element
+                    continue
 
-            article_meta_data = self._get_meta_data(URL, soup, article_config)
+                names = ""
+                productName = ""
 
-            self._save(article_meta_data, content)
-
-        except Exception as e:
-            logging.error("Something went wrong while trying to save: " + URL)
-            logging.error(e)
+            except Exception as e:
+                logging.error("Something went wrong while trying to save: " + URL)
+                logging.error(e)
 
 
-    def _get_meta_data(self, URL, soup, article_config):
+    def _get_meta_data(self, URL, soup):
         """
             initializes meta_parser with necessary information, parses metadata and returns it
             :param URL: the url to get the metadata of
             :param soup: the soup of the url
-            :param article_config: the config of the source the url was retrieved from
             :return: the meta_data of the urls article
             """
-        parser = meta_parser(URL, soup, article_config)
+        parser = meta_parser(URL, soup)
         parser.parse_metadata()  # das URL ist von der individuellen seite, nicht aus Base + Path
         return parser.get_article_meta_data()
 
 
-    def _save(self, article_meta_data, content):
+    def _save(self, manual_meta_data, content):
         """
         saves the html source of the given URL 
         also saves the meta data of the page
         only saved the content if meta_data was successfully indexed, if content saving raises an exception, deletes created meta_data
-        :param article_meta_data: the meta data to save
+        :param manual_meta_data: the meta data to save
         :param content: the page content to save
         """
         id = None
         try:
-            id = client_factory.get_meta_client().index_meta_data(article_meta_data)
+            id = client_factory.get_meta_client().index_meta_data(manual_meta_data)
             logging.info("Success -- Saved Metadata")
 
         except Exception as e:
@@ -126,8 +132,8 @@ class ManualScraper:
 
         if id:
             try:
-                client_factory.get_file_client().save_as_file(article_meta_data["filepath"],
-                                                              article_meta_data["filename"], content)
+                client_factory.get_file_client().save_as_file(manual_meta_data["filepath"],
+                                                              manual_meta_data["filename"], content)
                 logging.info("Success -- Saved content")
 
             except Exception as e:
@@ -136,38 +142,43 @@ class ManualScraper:
                 client_factory.get_meta_client().delete_meta_data(id)
 
 
-    def _get_layer_links(self, article_config):
+    def _get_layer_links(self, path):
         """
         creates a list with the links to all articles from the given manual_config
         also completes every relative URL with the base_url if necessary
         checks every link if it matches the given conditions in the manual_config
-        checks if there is not already an entry in the article_meta_data index
-        :param article_config: the manual_config of the sources page to get die article links of
+        checks if there is not already an entry in the manual_meta_data index
+        :param manual_config: the manual_config of the sources page to get die article links of
         :return: a list with all valid links of the page
         """
 
-        article_links = []
+        links = []
 
-        source_URL = article_config["base_url"] + article_config["path_url"]
+        if self._is_relative_URL(path):
+            source_URL = self.manual_config["base_url"] + path
+        else:
+            source_URL = path
+
         most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(source_URL,
-                                                                                               article_config["region"])
+                                                                                               self.manual_config[
+                                                                                                   "manufacturer_name"])
 
-        for link in self._get_link_list(source_URL, article_config["html_tag"], article_config["html_class"]):
+        for link in self._get_link_list(source_URL, layer["html_tag"], layer["html_class"]):
 
-            if self._is_valid(link, article_config["url_conditions"]):
+            if self._is_valid(link, self.manual_config["url_conditions"]):
 
                 if self._is_relative_URL(link):
-                    link = article_config["base_url"] + link
+                    link = self.manual_config["base_url"] + link
 
                 if not self._was_already_saved(most_recent_saved_articles_url, link):
-                    article_links.append(link)
+                    links.append(link)
 
-        article_links.reverse()  # important to have the newest article at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        links.reverse()  # important to have the newest article at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
 
-        return article_links
+        return links
 
 
-    def _get_link_list(self, URL, html_tag, html_class):
+    def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
         collects all links from the specified URL that fits the html_tag html_class combination
         If no href is found, the children will be searched for a href
@@ -175,7 +186,7 @@ class ManualScraper:
 
         link_list = []
 
-        for link in self._get_tag_list(URL, html_tag, html_class):
+        for link in self._get_tag_list(URL, html_tag, html_class, css_selector):
 
             if link.has_attr('href'):
                 link_list.append(link['href'])
@@ -189,7 +200,7 @@ class ManualScraper:
         return link_list
 
 
-    def _get_tag_list(self, URL, html_tag, html_class):
+    def _get_tag_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
         collects all tags that match html_tag and html_class
         """
@@ -200,13 +211,19 @@ class ManualScraper:
         soup = self._get_soup_of_static_page(URL)
 
         if soup:
-            tag_list = soup.body.find_all(html_tag, html_class)
+            if html_tag:
+                tag_list = soup.body.find_all(html_tag, html_class)
+            elif css_selector:
+                tag_list = soup.bofy.select(css_selector)
 
         # if static doesnt work try dynamic
         if tag_list == []:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
-                tag_list = soup.body.find_all(html_tag, html_class)
+                if html_tag:
+                    tag_list = soup.body.find_all(html_tag, html_class)
+                elif css_selector:
+                    tag_list = soup.bofy.select(css_selector)
 
         # if still no result something must be wrong with the html_tag and html_class
         if tag_list == []:
