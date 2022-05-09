@@ -1,8 +1,8 @@
 #####################################################################
 #                                                                   #
-#                     Lennard Rose 5118054                          #
+#                     Lennard Rose 5122737                          #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
-#                           SS2021                                  #
+#                           SS2022                                  #
 #                                                                   #
 #####################################################################
 import utils
@@ -19,11 +19,13 @@ import logging
 import ssl
 import os
 
-class ArticleScraper:
+
+class ManualScraper:
 
     def __init__(self):
         ssl._create_default_https_context = ssl._create_unverified_context
         self.driver = self._get_webdriver()
+
 
     def _get_webdriver(self):
         """
@@ -32,6 +34,7 @@ class ArticleScraper:
         https://www.makeuseof.com/how-to-install-selenium-webdriver-on-any-computer-with-python/
         """
         try:
+            path = None
             driver_options = Options()
             driver_options.headless = True
 
@@ -43,28 +46,31 @@ class ArticleScraper:
                 return webdriver.Chrome(executable_path=path, options=driver_options)
 
         except Exception as e:
-            logging.error("failed to initialize webdriver for selenium, make sure you downloaded a driver and wrote the correct path to config, current path: " + path)
+            logging.error(
+                "failed to initialize webdriver for selenium, make sure you downloaded a driver and wrote the correct path to config, current path: " + path)
             logging.error(e)
-    
 
-    def scrape(self, article_config):
+
+    def scrape(self, manual_config):
         """
-        makes sure necessary properties are set in the article_config
+        makes sure necessary properties are set in the manual_config
         saves all of the pages valid article_links content
         """
-        if article_config["base_url"] == None:
-            logging.error("Missing url information to scrape from article_config")
+        if manual_config["base_url"] == None:
+            logging.error("Missing url information to scrape from manual_config")
 
         else:
 
-            logging.info("Start scraping from articles source URL: %s", article_config["base_url"] + article_config["path_url"])
+            for path in manual_config["paths"]:
 
-            if article_config["html_tag"] == None and article_config["html_class"] == None:
-                logging.error("Missing html information to scrape from article_config: %s", article_config["base_url"] + article_config["path_url"])
+                logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"] + path["path_url"])
 
-            else:
-                for article_link in self._get_valid_article_links(article_config):
-                    self._save_page(article_config, article_link)
+                for next_layer_links in self.get_layer_links(manual_config["base_url"] + path["path_url"]):
+                    self._save_page(manual_config, next_layer_links)
+
+        """                if path["html_tag"] == None and manual_config["html_class"] == None:
+                    logging.error("Missing html information to scrape from manual_config: %s",
+                                  manual_config["base_url"] + manual_config["path_url"])"""
 
 
     def _save_page(self, article_config, URL):
@@ -79,7 +85,7 @@ class ArticleScraper:
             soup = self._get_soup(URL)
             content = self._get_text_content(soup)
 
-            article_meta_data = self._get_meta_data( URL, soup, article_config)
+            article_meta_data = self._get_meta_data(URL, soup, article_config)
 
             self._save(article_meta_data, content)
 
@@ -89,16 +95,16 @@ class ArticleScraper:
 
 
     def _get_meta_data(self, URL, soup, article_config):
-            """
+        """
             initializes meta_parser with necessary information, parses metadata and returns it
             :param URL: the url to get the metadata of
             :param soup: the soup of the url
             :param article_config: the config of the source the url was retrieved from
             :return: the meta_data of the urls article
             """
-            parser = meta_parser( URL, soup, article_config)
-            parser.parse_metadata() #das URL ist von der individuellen seite, nicht aus Base + Path
-            return parser.get_article_meta_data()
+        parser = meta_parser(URL, soup, article_config)
+        parser.parse_metadata()  # das URL ist von der individuellen seite, nicht aus Base + Path
+        return parser.get_article_meta_data()
 
 
     def _save(self, article_meta_data, content):
@@ -111,58 +117,43 @@ class ArticleScraper:
         """
         id = None
         try:
-            id = client_factory.get_meta_client().index_meta_data(article_meta_data)  
+            id = client_factory.get_meta_client().index_meta_data(article_meta_data)
             logging.info("Success -- Saved Metadata")
 
         except Exception as e:
-            logging.error("failed to save Metadata with meta_client") 
+            logging.error("failed to save Metadata with meta_client")
             logging.error(e)
 
         if id:
             try:
-                client_factory.get_file_client().save_as_file(article_meta_data["filepath"], article_meta_data["filename"], content)
+                client_factory.get_file_client().save_as_file(article_meta_data["filepath"],
+                                                              article_meta_data["filename"], content)
                 logging.info("Success -- Saved content")
 
             except Exception as e:
                 logging.error("failed to save Content with file_client")
                 logging.error(e)
-                client_factory.get_meta_client().delete_meta_data(id) 
+                client_factory.get_meta_client().delete_meta_data(id)
 
-    
 
-    def _get_text_content(self, soup):
+    def _get_layer_links(self, article_config):
         """
-        parse soup to string 
-        takes care of proper encoding
-        """
-        encoding = soup.original_encoding or 'utf-8' #encoding für sonderzeichen 
-        content = soup.encode(encoding) 
-
-        content = soup.prettify()
-        
-        if type(content) != str: #für den fall das eine liste oä zurückgegeben wird
-            content = "".join(content)
-
-        return content
-
-    def _get_valid_article_links(self, article_config):
-        """
-        creates a list with the links to all articles from the given article_config
+        creates a list with the links to all articles from the given manual_config
         also completes every relative URL with the base_url if necessary
-        checks every link if it matches the given conditions in the article_config
+        checks every link if it matches the given conditions in the manual_config
         checks if there is not already an entry in the article_meta_data index
-        :param article_config: the article_config of the sources page to get die article links of
+        :param article_config: the manual_config of the sources page to get die article links of
         :return: a list with all valid links of the page
         """
 
         article_links = []
 
         source_URL = article_config["base_url"] + article_config["path_url"]
-        most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(source_URL, article_config["region"]) 
-
+        most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(source_URL,
+                                                                                               article_config["region"])
 
         for link in self._get_link_list(source_URL, article_config["html_tag"], article_config["html_class"]):
-            
+
             if self._is_valid(link, article_config["url_conditions"]):
 
                 if self._is_relative_URL(link):
@@ -171,7 +162,7 @@ class ArticleScraper:
                 if not self._was_already_saved(most_recent_saved_articles_url, link):
                     article_links.append(link)
 
-        article_links.reverse() # important to have the newest article at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        article_links.reverse()  # important to have the newest article at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
 
         return article_links
 
@@ -181,43 +172,41 @@ class ArticleScraper:
         collects all links from the specified URL that fits the html_tag html_class combination
         If no href is found, the children will be searched for a href
         """
-        
+
         link_list = []
-        
-        for link in self._get_tag_list(URL,html_tag, html_class): 
+
+        for link in self._get_tag_list(URL, html_tag, html_class):
 
             if link.has_attr('href'):
                 link_list.append(link['href'])
 
-            else:    
+            else:
                 link = self._search_direct_children_for_href(link)
 
                 if link != None:
                     link_list.append(link)
 
-        
         return link_list
+
 
     def _get_tag_list(self, URL, html_tag, html_class):
         """
         collects all tags that match html_tag and html_class
-        does this by trying to get the tags 
         """
 
         tag_list = []
 
-        #first try static page
+        # first try static page
         soup = self._get_soup_of_static_page(URL)
 
         if soup:
-            tag_list = soup.body.find_all(html_tag, html_class )
+            tag_list = soup.body.find_all(html_tag, html_class)
 
-        #if static doesnt work try dynamic
+        # if static doesnt work try dynamic
         if tag_list == []:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
-                tag_list = soup.body.find_all(html_tag, html_class )
-            
+                tag_list = soup.body.find_all(html_tag, html_class)
 
         # if still no result something must be wrong with the html_tag and html_class
         if tag_list == []:
@@ -225,14 +214,14 @@ class ArticleScraper:
 
         return tag_list
 
-    
+
     def _get_soup(self, URL):
         """
         return soup by trying first to get it as a static page, after failure tries as a dynamic page
         :params URL: the url
         """
         soup = self._get_soup_of_static_page(URL)
-        
+
         if soup == None:
             soup = self._get_soup_of_dynamic_page(URL)
 
@@ -253,7 +242,8 @@ class ArticleScraper:
                 retry_count += 1
                 page = requests.get(URL, timeout=5)
             except Exception as e:
-                logging.warning("request unable to get: %s - retries left: %d", URL, int(utils.config["MAX_TRY"]) - retry_count)
+                logging.warning("request unable to get: %s - retries left: %d", URL,
+                                int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
         return BeautifulSoup(page.content, 'html5lib')
 
@@ -271,9 +261,10 @@ class ArticleScraper:
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                time.sleep(1) #load page
+                time.sleep(1)  # load page
             except Exception as e:
-                logging.warning("selenium unable to get: %s - retries left: %d", URL, int(utils.config["MAX_TRY"]) - retry_count)
+                logging.warning("selenium unable to get: %s - retries left: %d", URL,
+                                int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
         return BeautifulSoup(self.driver.page_source, 'html5lib')
 
@@ -282,7 +273,7 @@ class ArticleScraper:
         """
         searches all children of a tag for a href, returns the first
         """
-        for child in tag.findAll(recursive = True):
+        for child in tag.findAll(recursive=True):
             if child.has_attr('href'):
                 return child['href']
         else:
@@ -300,7 +291,6 @@ class ArticleScraper:
             return current_URL in most_recent_saved_articles_URLs
         else:
             return False
-
 
 
     def _is_relative_URL(self, URL):
@@ -328,22 +318,19 @@ class ArticleScraper:
 
             for condition in conditions:
 
-                is_included = bool(re.search(condition["condition_string"], URL)) #if the condition_string is part of the URL
+                is_included = bool(
+                    re.search(condition["condition_string"], URL))  # if the condition_string is part of the URL
 
-                if condition["include_condition"]: #if the condition_string should be included in the URL
-                    if is_included: 
+                if condition["include_condition"]:  # if the condition_string should be included in the URL
+                    if is_included:
                         valid = valid
                     else:
                         valid = False
-                        
-                else: # if the condition_string should not be included in the URL
+
+                else:  # if the condition_string should not be included in the URL
                     if is_included:
                         valid = False
                     else:
                         valid = valid
 
         return valid
-
-
-                
-            

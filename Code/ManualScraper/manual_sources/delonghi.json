@@ -1,0 +1,106 @@
+{
+    "manufacturer_name": "Delonghi",
+    "base_url": "https://www.delonghi.com/",
+    "paths":[
+        {
+            "path_url": "de-de/manuals/produkte/kaffee/siebtraegermaschinen-und-espressomaschinen/c/manual_espresso_makers",
+            "layer":
+                {
+                    "html_tag": "div",
+                    "html_class": "dln-categoryBox",
+                    "layer":
+                        {
+                            "html_tag": "div",
+                            "html_class": "dln-categoryBox",
+                            "layer":
+                                {
+                                    "html_tag": "ul",
+                                    "html_class": "dln-instruction-manuals__list"
+                                }
+
+                        }
+
+                }
+
+        },
+        {
+            "path_url": "de-de/manuals/produkte/kaffee/kaffeevollautomaten/c/automatic_coffee_makers",
+            "layer": [
+                {
+                    "html_tag": "div",
+                    "html_class": "dln-categoryBox",
+                    "layer": [
+                        {
+                            "html_tag": "div",
+                            "html_class": "dln-categoryBox",
+                            "layer": [
+                                {
+                                    "html_tag": "ul",
+                                    "html_class": "dln-instruction-manuals__list"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "path_url": "de-de/manuals/produkte/kaffee/nespresso-kapselmaschinen/c/nespresso_coffee_machines",
+            "layer": [
+                {
+                    "html_tag": "div",
+                    "html_class": "dln-categoryBox",
+                    "layer": [
+                        {
+                            "html_tag": "div",
+                            "html_class": "dln-categoryBox",
+                            "layer": [
+                                {
+                                    "html_tag": "ul",
+                                    "html_class": "dln-instruction-manuals__list"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "path_url": "de-de/manuals/produkte/kaffee/moka/c/moka",
+            "layer": [
+                {
+                    "html_tag": "div",
+                    "html_class": "dln-categoryBox",
+                    "layer": [
+                        {
+                            "html_tag": "ul",
+                            "html_class": "dln-instruction-manuals__list"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "path_url": "de-de/manuals/produkte/kaffee/kaffeemaschinen/c/filter_coffee_makers",
+            "layer": [
+                {
+                    "html_tag": "div",
+                    "html_class": "dln-categoryBox",
+                    "layer": [
+                        {
+                            "html_tag": "div",
+                            "html_class": "dln-categoryBox",
+                            "layer": [
+                                {
+                                    "html_tag": "ul",
+                                    "html_class": "dln-instruction-manuals__list"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+
+} 

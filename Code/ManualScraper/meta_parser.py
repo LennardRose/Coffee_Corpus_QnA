@@ -12,7 +12,7 @@ import logging
 
 class meta_parser:
     """
-    parses meta data from given soup based on the specifications in the article_config
+    parses meta data from given soup based on the specifications in the manual_config
 
     """
 
@@ -49,7 +49,7 @@ class meta_parser:
 
     def parse_metadata(self):
         """
-        chooses a parsing strategy for every meta attribute based on the given source set in the article_config to set the value
+        chooses a parsing strategy for every meta attribute based on the given source set in the manual_config to set the value
         sets the filename
         """
         for key in self.article_meta_data.keys():

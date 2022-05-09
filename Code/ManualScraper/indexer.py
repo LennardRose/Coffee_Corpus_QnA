@@ -1,9 +1,9 @@
 # import glob and os
 #####################################################################
 #                                                                   #
-#                     Lennard Rose 5118054                          #
+#                     Lennard Rose 5122737                          #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
-#                           SS2021                                  #
+#                           SS2022                                  #
 #                                                                   #
 #####################################################################
 import os, glob
@@ -25,7 +25,7 @@ def _current_path():
 # default path is the script's current dir
 def _get_files_in_dir():
 
-    self = os.path.join(_current_path(), "article_sources")
+    self = os.path.join(_current_path(), "manual_sources")
 
     file_list = []
 
@@ -54,9 +54,9 @@ all_files = _get_files_in_dir()
 
 print ("Files to index:", len( all_files ))
 
-if not client.indices.exists(index="article_config"):
-    print("Index article_config not found, initialize index.")
-    client.indices.create(index="article_config")
+if not client.indices.exists(index="manual_config"):
+    print("Index manual_config not found, initialize index.")
+    client.indices.create(index="manual_config")
 
 python_path = os.path.join(_current_path(), "venv", "Scripts", "python.exe")
 main_path = os.path.join(_current_path(), "main.py")
@@ -79,10 +79,10 @@ for file in enumerate(all_files):
             }
     }
 
-    already_indexed_document = client.search(index="article_config", body = query)
+    already_indexed_document = client.search(index="manual_config", body = query)
 
     if already_indexed_document["hits"]["total"]["value"] == 0:
-        response = client.index(index="article_config", body=data, doc_type="_doc")
+        response = client.index(index="manual_config", body=data, doc_type="_doc")
         if response["result"] == "created":
             index_count += 1
             print("@hourly " + python_path + " " + main_path + " --elasticsearch " + response["_id"])

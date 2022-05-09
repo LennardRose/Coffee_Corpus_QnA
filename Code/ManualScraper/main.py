@@ -1,13 +1,13 @@
 #####################################################################
 #                                                                   #
-#                     Lennard Rose 5118054                          #
+#                     Lennard Rose 5122737                          #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
-#                           SS2021                                  #
+#                           SS2022                                  #
 #                                                                   #
 #####################################################################
 import os
 from argument_parser_wrapper import ArgumentParserWrapper
-from article_scraper import ArticleScraper
+from manual_scraper import ManualScraper
 import logging
 import utils
 
@@ -21,11 +21,11 @@ if __name__ == '__main__':
 
     logging.info("Start Articlescraper")
     
-    scraper = ArticleScraper()
+    scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
     for source in parser.parse_data_from_arguments():
-            scraper.scrape(source)
+        scraper.scrape(source)
 
     logging.info("Close Articlescraper")
 
