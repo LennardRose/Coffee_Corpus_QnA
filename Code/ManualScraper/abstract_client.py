@@ -23,14 +23,14 @@ class MetaClient(ABC):
         logging.error("Method not implemented")
 
 
-class ArticleClient(ABC):
+class ManualClient(ABC):
     
     @abstractmethod
-    def get_article_config(self, id):
+    def get_manual_config(self, id):
         logging.error("Method not implemented")
 
     @abstractmethod
-    def get_all_article_configs(self):
+    def get_all_manual_configs(self):
         logging.error("Method not implemented")
 
 

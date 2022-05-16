@@ -24,8 +24,8 @@ class ArgumentParserWrapper: # clap the sillables like a 3 year old
         parses the arguments
         """
 
-        self.parser.add_argument("-c", "--articleclient", action="append", dest="articleclient_ids", default=[],
-                            help="config stored in articleclient, add id of the config")
+        self.parser.add_argument("-c", "--manualclient", action="append", dest="manualclient_ids", default=[],
+                            help="config stored in manualclient, add id of the config")
 
         self.parser.add_argument("-f", "--file", action="append", dest="filenames", default=[],
                             help="config stored in file, add filename")
@@ -36,22 +36,22 @@ class ArgumentParserWrapper: # clap the sillables like a 3 year old
 
     def parse_data_from_arguments(self):
         """
-        retrieves the article_configs mentioned in the arguments
-        if no arguments are given, retrieves all article_configs 
-        :return: list with all matching article_configs
+        retrieves the manual_configs mentioned in the arguments
+        if no arguments are given, retrieves all manual_configs
+        :return: list with all matching manual_configs
         """
 
         args = self._parse_arguments()
         data = []
 
         if len(sys.argv) < 2: #programmname ist auch ein argument, deshalb 2 ---> scrape alle in articleclient wenn nichts weiter angegeben
-            data = client_factory.get_article_client().get_all_article_configs()
+            data = client_factory.get_manual_client().get_all_manual_configs()
 
         for filename in args.filenames:
             data.append(client_factory.get_file_client().read_file(filename))
                 
-        for id in args.articleclient_ids:
-            data.append(client_factory.get_article_client().get_article_config(id))
+        for id in args.manualclient_ids:
+            data.append(client_factory.get_manual_client().get_manual_config(id))
 
         data = list(filter(None, data)) # filter the none values for missing values
 

@@ -5,18 +5,18 @@
 #                           SS2021                                  #
 #                                                                   #
 #####################################################################
-from abstract_client import ArticleClient, MetaClient
+from abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
 import utils
 
 
-
-class ElasticSearchClient(MetaClient, ArticleClient):
+class ElasticSearchClient(MetaClient, ManualClient):
     """
     Wrapper Class for the elasticsearch client
     offers all functionality concerning communication with the elasticsearch server
     """
+
 
     def __init__(self):
         """
@@ -24,10 +24,12 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         url from the config file
         """
 
-        logging.info("Init Elasticsearch client with url: %s : %s", utils.config["ELASTICSEARCH_URL"] , utils.config["ELASTICSEARCH_PORT"])
+        logging.info("Init Elasticsearch client with url: %s : %s", utils.config["ELASTICSEARCH_URL"],
+                     utils.config["ELASTICSEARCH_PORT"])
         self.es_client = Elasticsearch([utils.config["ELASTICSEARCH_URL"] + ":" + utils.config["ELASTICSEARCH_PORT"]])
 
         self._initialize_indizes_if_not_there()
+
 
     def _initialize_indizes_if_not_there(self):
         """
@@ -39,7 +41,7 @@ class ElasticSearchClient(MetaClient, ArticleClient):
 
         if not self.es_client.indices.exists(index="manual_meta_data"):
             logging.info("Index manual_meta_data not found, initialize index.")
-            self.es_client.indices.create(index="manual_meta_data", body=self._get_article_meta_data_mapping())
+            self.es_client.indices.create(index="manual_meta_data", body=self._get_manual_meta_data_mapping())
 
 
     def delete_meta_data(self, id):
@@ -47,16 +49,16 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         deletes meta_data doc in manual_meta_data index
         """
         self.es_client.delete(index="manual_meta_data", id=id)
-            
 
-    def get_article_config(self, id):
+
+    def get_manual_config(self, id):
         """
         search elasticsearch for article configs by id
         :param id: the id you want to search for
         :return: _source element of the found _doc or nothing
         """
 
-        query = {"query":{ "match": { "_id" : { "query" : id } } } }
+        query = {"query": {"match": {"_id": {"query": id}}}}
         docs = self.es_client.search(index="manual_config", body=query)
         if docs["hits"]["hits"]:
             return docs["hits"]["hits"][0]["_source"]
@@ -64,20 +66,18 @@ class ElasticSearchClient(MetaClient, ArticleClient):
             logging.error("id: " + id + " not found.")
 
 
-
-    def get_all_article_configs(self):    
+    def get_all_manual_configs(self):
         """
         search elasticsearch for all article configs
         :return: result field - list format - with all _source elements of the index - can be empty
         """
 
-        query = {"size" : 1000,"query": {"match_all" : {}}}
-        docs = self.es_client.search(index="manual_config", body = query)
+        query = {"size": 1000, "query": {"match_all": {}}}
+        docs = self.es_client.search(index="manual_config", body=query)
         result = []
         for doc in docs["hits"]["hits"]:
             result.append(doc["_source"])
         return result
-            
 
 
     def index_meta_data(self, metadata_json):
@@ -87,17 +87,16 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
 
         result = self.es_client.index(index="manual_meta_data", body=metadata_json,
-                             doc_type="_doc")
+                                      doc_type="_doc")
 
         if result["result"] == "created" and result["_id"]:
             return result["_id"]
 
         else:
             raise Exception("meta_data not created")
-            
 
-                             
-    def get_latest_entry_URL(self, source_URL, region):
+
+    def get_latest_entry_URL(self, source_URL, manufacturer_name):
         """
         searches for the latest entries url of the given website, number of returned entries defined in config
         latest means  index time 
@@ -106,21 +105,21 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         """
         try:
             result = []
-            query = { 
-                    "_source" : 
-                        { "includes" : [ "url" ] 
+            query = {
+                "_source":
+                    {"includes": ["url"]
+                     },
+                "query":
+                    {"bool":
+                        {"must": [
+                            {"match_phrase": {"manufacturer_name": {"query": manufacturer_name}}},
+                            {"match_phrase": {"source_url": {"query": source_URL}}}
+                        ]}
                     },
-                    "query" :  
-                        { "bool" : 
-                            { "must" : [ 
-                                {"match_phrase": { "region": { "query" : region } } },
-                                {"match_phrase": { "source_url": { "query" : source_URL } } }
-                            ]} 
-                        },
-                    "sort" : [{"index_time": {"order": "desc" } } ],
-                    "size": utils.config["RECENT_ARTICLE_COUNT"]
-                    }
-            docs = self.es_client.search(index="manual_meta_data", body = query)
+                "sort": [{"index_time": {"order": "desc"}}],
+                "size": utils.config["RECENT_MANUAL_COUNT"]
+            }
+            docs = self.es_client.search(index="manual_meta_data", body=query)
 
             for doc in docs["hits"]["hits"]:
                 result.append(doc["_source"]["url"])
@@ -129,132 +128,38 @@ class ElasticSearchClient(MetaClient, ArticleClient):
         except:
             return None
 
-    def url_exists(self, URL, source_URL):
-        """
-        searches in the data base if a given source_URL - URL combination exists
-        """
-        query = { "query" :  { "bool" : { "must" : [ {"match_phrase": { "source_url": { "query" : source_URL } } } ], "filter" : { "match_phrase": { "url": { "query" : URL } } } } } } 
 
-        hits = self.es_client.search(index="manual_meta_data", body = query)
-        
-        if hits["hits"]["total"]["value"] > 0:
-            return True
-        else:
-            return False
-
-
-    def _get_article_meta_data_mapping(self):
+    def _get_manual_meta_data_mapping(self):
         """
         :return: the manual_meta_data index mapping
         """
-        return { "mappings": {
-        "properties": {
-            "title": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          } 
-            },
-            "description": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword"
-            }
-          }
-            },
-            "url": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "source_url": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "type": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "date": {
-                "type": "date"
-            },
-            "index_time": {
-                "type": "date"
-            },
-            "region": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "site_name": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "author": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "keywords": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "filename": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            },
-            "filepath": {
-                "type": "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-            }
-        }
-    }
-}
+        # TODO einmal das json in ES indexieren und hier reinpasten
+        return {"mappings": {
+            "properties": {
+            }}}
 
 
+class MOCKElasticSearchClient(MetaClient, ManualClient):
+
+    def index_meta_data(self, metadata_json):
+        pass
+
+
+    def get_latest_entry_URL(self, source_URL, region):
+        pass
+
+
+    def delete_meta_data(self, id):
+        pass
+
+
+    def get_manual_config(self, id):
+        pass
+
+
+    def get_all_manual_configs(self):
+        pass
+
+
+    def __init__(self):
+        pass

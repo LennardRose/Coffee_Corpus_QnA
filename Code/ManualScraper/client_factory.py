@@ -11,7 +11,7 @@ from elastic_search_client import ElasticSearchClient
 import utils
 
 _file_client = None
-_article_client = None
+_manual_client = None
 _meta_client = None
 
 
@@ -24,14 +24,14 @@ def get_meta_client( ) -> MetaClient:
         _meta_client = _read_client_from_config("META_CLIENT")
     return _meta_client
 
-def get_article_client( ) -> ArticleClient:
+def get_manual_client() -> ManualClient:
     """
     returns a client for article_configs
     """
-    global _article_client
-    if _article_client == None:
-        _article_client = _read_client_from_config("ARTICLE_CLIENT")
-    return _article_client
+    global _manual_client
+    if _manual_client == None:
+        _manual_client = _read_client_from_config("MANUAL_CLIENT")
+    return _manual_client
 
 def get_file_client( ) -> FileClient:
     """

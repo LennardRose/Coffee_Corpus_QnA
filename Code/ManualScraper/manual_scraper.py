@@ -15,12 +15,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import html5lib
-from meta_parser import meta_parser
 import client_factory
 import logging
 import ssl
 import os
-from queue import Queue
 
 
 class ManualScraper:
@@ -106,41 +104,45 @@ class ManualScraper:
         """
         for URL in URLs:
             try:
-                most_recent_saved_articles_url = client_factory.get_meta_client() \
-                    .get_latest_entry_URL(URL,
-                                          self.manual_config["manufacturer_name"])
+                # all the different manuals
+                for manual_link in self._get_layer_links(URL, self.manual_config["pdf"]):
+                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(manual_link,
+                                                                                                           self.manual_config[
+                                                                                                               "manufacturer_name"])
 
-                if not self._was_already_saved(most_recent_saved_articles_url, URL):
-
-                    logging.info("Save content of: " + URL)
-
-                    # all the different manuals
-                    for element in self._get_link_list(URL,
-                                                       html_tag=self.manual_config["pdf"]["html_tag"],
-                                                       html_class=self.manual_config["pdf"]["html_class"],
-                                                       css_selector=self.manual_config["pdf"]["css_selector"]):
-                        # TODO
-                        meta_data = self._get_meta_data(element)
+                    if not self._was_already_saved(most_recent_saved_articles_url, URL):
                         # save element
-                        self._save(meta_data, element)
+                        logging.info("Save content of: " + manual_link)
+
+                        meta_data = self._get_meta_data(URL, manual_link)
+                        fileBytes = self._get_pdf_bytes(manual_link)
+
+                        self._save(meta_data, fileBytes)
 
             except Exception as e:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
 
 
-    def _get_meta_data(self, URL):
+    def _get_meta_data(self, URL, manual_link):
         """ TODO
             initializes meta_parser with necessary information, parses metadata and returns it
             :param URL: the url to get the metadata of
             :param soup: the soup of the url
             :return: the meta_data of the urls article
-
-        parser = meta_parser(URL)
-        parser.parse_metadata()  # das URL ist von der individuellen seite, nicht aus Base + Path
-        return parser.get_article_meta_data()
         """
-        return None
+        meta_data = {}
+        soup = self._get_soup(URL)
+
+        meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
+        meta_data["product_name"] = soup.select(self.manual_config["meta"]["product_name"])
+        meta_data["manual_name"] = soup.select(self.manual_config["meta"]["manual_name"])
+        meta_data["filepath"] = ""  # TODO
+        meta_data["filename"] = meta_data["product_name"] + "_" + meta_data["manual_name"]
+        meta_data["URL"] = manual_link
+        meta_data["index_time"] = utils.date_now()
+
+        return meta_data
 
 
     def _save(self, manual_meta_data, content):
@@ -263,8 +265,12 @@ class ManualScraper:
         return tag_list
 
 
+    def _get_pdf_bytes(self, URL):
+        return requests.get(URL).content
+
+
     def _get_soup(self, URL):
-        """ TODO delete?
+        """
         return soup by trying first to get it as a static page, after failure tries as a dynamic page
         :params URL: the url
         """
@@ -366,7 +372,7 @@ class ManualScraper:
         """
         valid = True
 
-        if conditions != None and conditions != []:
+        if conditions is not None and conditions != []:
 
             for condition in conditions:
 

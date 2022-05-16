@@ -73,7 +73,7 @@ for file in enumerate(all_files):
         "query" :  
             { "bool" : 
                 { "must" : [ 
-                    {"match_phrase": { "region": { "query" : data["region"] } } },
+                    {"match_phrase": { "manufacturer_name": { "query" : data["manufacturer_name"] } } },
                     {"match_phrase": { "base_url": { "query" : data["base_url"] } } }
                 ]} 
             }
