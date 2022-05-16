@@ -8,19 +8,25 @@
         "de-de/manuals/produkte/kaffee/moka/c/moka",
         "de-de/manuals/produkte/kaffee/kaffeemaschinen/c/filter_coffee_makers"
     ],
-    "layer": [
+    "layers": [
         {
             "html_tag": "div",
             "html_class": "dln-categoryBox",
             "css_selector" : ".dln-category-browser__category > div > a",
-            "filter": "Intro"
+            "filter": [
+                {
+                    "condition_string": "Intro",
+                    "include_condition" : false
+                }
+            ]
         }
     ],
     "pdf":
         {
             "html_tag": null,
             "html_class": null,
-            "css_selector": ".dln-instruction-manuals__list > li > a"
+            "css_selector": ".dln-instruction-manuals__list > li > a",
+            "filter" : null
         },
     "meta" :
         {
