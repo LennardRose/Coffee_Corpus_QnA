@@ -139,26 +139,26 @@ class ElasticSearchClient(MetaClient, ManualClient):
             }}}
 
 
-class MOCKElasticSearchClient(MetaClient, ManualClient):
+class MockElasticSearchClient(MetaClient, ManualClient):
 
     def index_meta_data(self, metadata_json):
-        pass
+        return True
 
 
     def get_latest_entry_URL(self, source_URL, region):
-        pass
+        return True
 
 
     def delete_meta_data(self, id):
-        pass
+        return True
 
 
     def get_manual_config(self, id):
-        pass
+        return True
 
 
     def get_all_manual_configs(self):
-        pass
+        return True
 
 
     def __init__(self):

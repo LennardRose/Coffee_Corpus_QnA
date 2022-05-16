@@ -66,16 +66,16 @@ class ManualScraper:
             logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"])
 
             links = []
-            links[0] = manual_config["paths"]
+            links.append(manual_config["paths"])
 
             # add a queue for every layer as well as one for the end
-            for _ in range(0, len(manual_config["layers"]) + 1):
+            for _ in range(0, len(manual_config["layers"])):
                 links.append([])
 
             # for each i, try the current layer to get new links, try these again with the current layer, if they stop
             # yielding results, put them to the next i
             # do not iterate over the last i
-            for i in range(0, len(links) - 2):
+            for i in range(0, len(links) - 1):
                 while links[i]:
                     old_link = links[i].pop(0)
                     new_links = []

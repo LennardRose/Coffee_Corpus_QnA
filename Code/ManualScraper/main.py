@@ -19,7 +19,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename=utils.config["STANDARD_LOG_FILENAME"],
                         format=utils.config["STANDARD_LOG_FORMAT"],
                         datefmt=utils.config["STANDARD_LOG_DATE_FORMAT"],
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 
     logging.info("Start ManualScraper")
 

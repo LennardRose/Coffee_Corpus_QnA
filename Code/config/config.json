@@ -11,12 +11,12 @@
 "STANDARD_DATE_FORMAT" :"%Y-%m-%d",
 "STANDARD_LOG_FORMAT" : "[%(levelname)s][%(asctime)s]: %(message)s",
 "STANDARD_LOG_DATE_FORMAT" : "%Y-%m-%d %H:%M:%S",
-"STANDARD_LOG_FILENAME" : "articlescraper.log",
+"STANDARD_LOG_FILENAME" : "manualscraper.log",
 "WEBDRIVER_DIR" : "drivers",
 "WEBDRIVER_FILE" : "chromedriver.exe",
 "CLIENTS" : {   
-    "META_CLIENT" : "elastic",
-    "MANUAL_CLIENT" : "elastic",
-    "FILE_CLIENT" : "hdfs"
+    "META_CLIENT" : "mock_elastic",
+    "MANUAL_CLIENT" : "mock_elastic",
+    "FILE_CLIENT" : "mock_hdfs"
 }
 } 

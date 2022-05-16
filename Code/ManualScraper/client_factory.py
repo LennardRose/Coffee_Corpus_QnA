@@ -7,7 +7,7 @@
 #####################################################################
 from hdfs_client import HDFSClient, MOCKHDFSClient
 from abstract_client import *
-from elastic_search_client import ElasticSearchClient
+from elastic_search_client import ElasticSearchClient, MockElasticSearchClient
 import utils
 
 _file_client = None
@@ -51,6 +51,8 @@ def _read_client_from_config( client_type):
 
     if client_name == "elastic":
         return ElasticSearchClient()
+    elif client_name == "mock_elastic":
+        return MockElasticSearchClient()
     elif client_name == "hdfs":
         return HDFSClient()
     elif client_name == "mock_hdfs":
