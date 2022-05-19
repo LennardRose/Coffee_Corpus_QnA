@@ -146,7 +146,7 @@ class MockElasticSearchClient(MetaClient, ManualClient):
 
 
     def get_latest_entry_URL(self, source_URL, region):
-        return True
+        return False
 
 
     def delete_meta_data(self, id):

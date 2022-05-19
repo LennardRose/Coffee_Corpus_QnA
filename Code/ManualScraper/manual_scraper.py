@@ -7,6 +7,8 @@
 #####################################################################
 from typing import List
 
+
+
 import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -19,6 +21,7 @@ import client_factory
 import logging
 import ssl
 import os
+from tqdm import tqdm
 
 
 class ManualScraper:
@@ -75,7 +78,7 @@ class ManualScraper:
             # for each i, try the current layer to get new links, try these again with the current layer, if they stop
             # yielding results, put them to the next i
             # do not iterate over the last i
-            for i in range(0, len(links) - 1):
+            for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
                 while links[i]:
                     old_link = links[i].pop(0)
                     new_links = []
@@ -87,7 +90,7 @@ class ManualScraper:
                     else:
                         # to the next layer, ultimatively the last one gets filled only with "product pages" or
                         # the destination link on which the manuals are
-                        links[i + 1].extend(old_link)
+                        links[i + 1].append(old_link)
 
             self._save_manuals(links[-1])
 
@@ -102,7 +105,7 @@ class ManualScraper:
         saves all data
         :param URLs: An iterable with all the product pages URLs
         """
-        for URL in URLs:
+        for URL in tqdm(URLs, desc="pdfs saved"):
             try:
                 # all the different manuals
                 for manual_link in self._get_layer_links(URL, self.manual_config["pdf"]):
@@ -135,10 +138,10 @@ class ManualScraper:
         soup = self._get_soup(URL)
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
-        meta_data["product_name"] = soup.select(self.manual_config["meta"]["product_name"])
-        meta_data["manual_name"] = soup.select(self.manual_config["meta"]["manual_name"])
-        meta_data["filepath"] = ""  # TODO
-        meta_data["filename"] = meta_data["product_name"] + "_" + meta_data["manual_name"]
+        meta_data["product_name"] = utils.slugify(soup.select(self.manual_config["meta"]["product_name"])[0].text)
+        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[0].text)
+        meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
+        meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
         meta_data["URL"] = manual_link
         meta_data["index_time"] = utils.date_now()
 

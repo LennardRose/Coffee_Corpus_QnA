@@ -67,8 +67,8 @@ class MOCKHDFSClient(FileClient):
         os.makedirs(file_path, exist_ok=True)
         target = os.path.join(file_path, filename)
 
-        with open(target, "w", encoding="utf-8") as file:
-                file.writelines(content)
+        with open(target, "wb") as file:
+                file.write(content)
 
 
     def read_file(self, file_path, filename):
