@@ -108,7 +108,8 @@ class ManualScraper:
         for URL in tqdm(URLs, desc="pdfs saved"):
             try:
                 # all the different manuals
-                for manual_link in self._get_layer_links(URL, self.manual_config["pdf"]):
+                manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
+                for i, manual_link in enumerate(manual_links):
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(manual_link,
                                                                                                            self.manual_config[
                                                                                                                "manufacturer_name"])
@@ -117,7 +118,7 @@ class ManualScraper:
                         # save element
                         logging.info("Save content of: " + manual_link)
 
-                        meta_data = self._get_meta_data(URL, manual_link)
+                        meta_data = self._get_meta_data(URL, manual_link, i)
                         fileBytes = self._get_pdf_bytes(manual_link)
 
                         self._save(meta_data, fileBytes)
@@ -127,7 +128,7 @@ class ManualScraper:
                 logging.error(e)
 
 
-    def _get_meta_data(self, URL, manual_link):
+    def _get_meta_data(self, URL, manual_link, number):
         """ TODO
             initializes meta_parser with necessary information, parses metadata and returns it
             :param URL: the url to get the metadata of
@@ -139,9 +140,10 @@ class ManualScraper:
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(soup.select(self.manual_config["meta"]["product_name"])[0].text)
-        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[0].text)
+        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[number].text) #TODO gucken obs hier bricht
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
         meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+        meta_data["language"] = None #TODO
         meta_data["URL"] = manual_link
         meta_data["index_time"] = utils.date_now()
 
@@ -168,7 +170,8 @@ class ManualScraper:
         if current_id:
             try:
                 client_factory.get_file_client().save_as_file(manual_meta_data["filepath"],
-                                                              manual_meta_data["filename"], content)
+                                                              manual_meta_data["filename"],
+                                                              content)
                 logging.info("Success -- Saved content")
 
             except Exception as e:
