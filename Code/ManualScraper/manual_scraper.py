@@ -245,7 +245,7 @@ class ManualScraper:
         tag_list = []
 
         # first try static page
-        soup = self._get_soup_of_static_page(URL)
+        soup = self._get_soup(URL)
 
         if soup:
             if css_selector:
@@ -253,20 +253,11 @@ class ManualScraper:
             elif html_tag:
                 tag_list = soup.body.find_all(html_tag, html_class)
 
-        # if static doesnt work try dynamic
-        if not tag_list:
-            soup = self._get_soup_of_dynamic_page(URL)
-            if soup:
-                if css_selector:
-                    tag_list = soup.body.select(css_selector)
-                elif html_tag:
-                    tag_list = soup.body.find_all(html_tag, html_class)
-
-        # if still no result something must be wrong with the html_tag and html_class
-        if not tag_list:
-            logging.error("No results found for html_class: " + html_class
-                          + ", html_tag: " + html_tag
-                          + ", css_selector: " + css_selector)
+            # if still no result something must be wrong with the html_tag and html_class oooor we are at the product page
+            if not tag_list:
+                logging.error("No results found for html_class: " + html_class
+                              + ", html_tag: " + html_tag
+                              + ", css_selector: " + css_selector)
 
         return tag_list
 
@@ -284,6 +275,9 @@ class ManualScraper:
 
         if soup is None:
             soup = self._get_soup_of_dynamic_page(URL)
+
+            if soup is None:
+                logging.error("No soup could be cooked for" + URL+" !")
 
         return soup
 
