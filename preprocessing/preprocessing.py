@@ -1,10 +1,72 @@
 import os
 import fitz
 import pandas as pd
+import statistics
 from pathlib import Path
 from langdetect import detect
 
 class Preprocessor:
+    
+    def segment(document):
+        def flags_decomposer(flags):
+            """Make font flags human readable."""
+            line = []    
+            if flags & 2 ** 0:
+                line.append("superscript")
+            if flags & 2 ** 1:
+                line.append("italic")
+            if flags & 2 ** 2:
+                line.append("serifed")
+            else:
+                line.append("sans")
+            if flags & 2 ** 3:
+                line.append("monospaced")
+            else:
+                line.append("proportional")
+            if flags & 2 ** 4:
+                line.append("bold")
+        return ", ".join(line)
+        
+        results = []
+        for page in document:
+            # read page text as a dictionary, suppressing extra spaces in CJK fonts (%dic)
+            dict= page.get_text("dict", flags=11)
+            blocks = dict["blocks"]
+            
+            for block in blocks:  # iterate through the text blocks
+                
+                for line in block["lines"]:  # iterate through the text lines
+                    
+                    for span in line["spans"]:  # iterate through the text spans
+                        results.append([span["size"], span["font"],span["text"]])  #,s["font"],s["color"]
+        
+        header = []
+        counter = 0
+        substring = "Bold"
+        
+        for t in range(len(results)):
+            if (substring in results[t][1] and len(results[t][2])>4):
+                header.append(results[t][0])
+                if (results[t][0]>10.8 and results[t][0]<11.2):
+                    counter=counter+1
+          
+        header2 = []
+        mode1=statistics.mode(header)
+        
+        for u in range(len(header)):
+            if(header[u] != mode1):
+                header2.append(header[u])
+        mode2=statistics.mode(header2)
+        
+        if (mode1 > mode2):
+            size_header1 = mode1
+            size_header2 = mode2
+        else:
+            size_header1 = mode2
+            size_header2 = mode1
+            
+        return size_header1, size_header2
+    
     def __init__(self, safe_path=None):
         """
         Preprocessor for the coffee manufacturer manuals.
@@ -21,8 +83,8 @@ class Preprocessor:
         # self.size_header1 = 11
         # self.size_header2 = 9
         self.font_header = "MyriadPro-Bold"
-        self.size_header1 = 12
-        self.size_header2 = 9
+        self.size_header1 = size_header1
+        self.size_header2 = size_header2
     
     def _get_files(self, paths):
         """
@@ -124,6 +186,8 @@ class Preprocessor:
         # TODO: Refactor this method
         document = fitz.open(single_path)
         document_pages = document.pages()
+        
+        
         
         headline1 = None
         headline2 = None
