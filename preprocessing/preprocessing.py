@@ -6,6 +6,23 @@ from pathlib import Path
 from langdetect import detect
 
 class Preprocessor:
+    def __init__(self, safe_path=None):
+        """
+        Preprocessor for the coffee manufacturer manuals.
+
+        Parameters
+        ----------
+        safe_path : Path | str
+            Path for where the outputted csv-file should be saved. If not provided a pandas DataFrame will be returned.
+        """
+        self.safe_path = safe_path
+        
+        # TODO: Dynamically set the font and sizes to search for the headings in the document
+        # self.font_header = "MyriadPro-BoldCond"
+        # self.size_header1 = 11
+        # self.size_header2 = 9
+        self.font_header = "MyriadPro-Bold"
+        
     
     def segment(document):
         def flags_decomposer(flags):
@@ -67,24 +84,6 @@ class Preprocessor:
             
         return size_header1, size_header2
     
-    def __init__(self, safe_path=None):
-        """
-        Preprocessor for the coffee manufacturer manuals.
-
-        Parameters
-        ----------
-        safe_path : Path | str
-            Path for where the outputted csv-file should be saved. If not provided a pandas DataFrame will be returned.
-        """
-        self.safe_path = safe_path
-        
-        # TODO: Dynamically set the font and sizes to search for the headings in the document
-        # self.font_header = "MyriadPro-BoldCond"
-        # self.size_header1 = 11
-        # self.size_header2 = 9
-        self.font_header = "MyriadPro-Bold"
-        self.size_header1 = size_header1
-        self.size_header2 = size_header2
     
     def _get_files(self, paths):
         """
@@ -216,13 +215,13 @@ class Preprocessor:
                             if span_text.isnumeric():
                                 continue
                             
-                            if span_font == self.font_header and span_size == self.size_header1:
+                            if span_font == self.font_header and span_size == size_header1:
                                 last_span = 1
                                 headline1 = span_text
                                 headline2 = None
                                 continue
                             
-                            if span_font == self.font_header and span_size == self.size_header2:
+                            if span_font == self.font_header and span_size == size_header2:
                                 last_span = 2
                                 headline2 = span_text
                                 continue
