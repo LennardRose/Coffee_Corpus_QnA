@@ -38,8 +38,8 @@ class ManualScraper:
         expects you to have the file in a directory named after your os (linux / windows / if you use mac, go buy linux)
         https://www.makeuseof.com/how-to-install-selenium-webdriver-on-any-computer-with-python/
         """
+        path = None
         try:
-            path = None
             driver_options = Options()
             driver_options.headless = True
 
@@ -52,7 +52,8 @@ class ManualScraper:
 
         except Exception as e:
             logging.error("failed to initialize webdriver for selenium, /"
-                          "make sure you downloaded a driver and wrote the correct path to config, current path: " + path)
+                          "make sure you downloaded a driver and wrote the correct path to config, /"
+                          "current path: " + path)
             logging.error(e)
 
 
@@ -264,9 +265,9 @@ class ManualScraper:
 
         # if still no result something must be wrong with the html_tag and html_class
         if not tag_list:
-            logging.error("No results found for html_class: " + html_class
-                          + ", html_tag: " + html_tag
-                          + ", css_selector: " + css_selector)
+            logging.error("No results found for html_class: " + str(html_class)
+                          + ", html_tag: " + str(html_tag)
+                          + ", css_selector: " + str(css_selector))
 
         return tag_list
 
@@ -329,6 +330,7 @@ class ManualScraper:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
+        self.driver.close()
         if page:
             return BeautifulSoup(self.driver.page_source, 'html5lib')
         else:
