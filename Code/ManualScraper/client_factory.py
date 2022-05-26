@@ -15,7 +15,7 @@ _manual_client = None
 _meta_client = None
 
 
-def get_meta_client( ) -> MetaClient:
+def get_meta_client() -> MetaClient:
     """
     returns a client for metadata
     """
@@ -43,7 +43,7 @@ def get_file_client( ) -> FileClient:
     return _file_client
 
 
-def _read_client_from_config( client_type):
+def _read_client_from_config(client_type):
     """
     returns an client based on its type and the class as set in the config file
     """

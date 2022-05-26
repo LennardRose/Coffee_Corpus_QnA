@@ -1,0 +1,34 @@
+{
+    "manufacturer_name": "Delonghi",
+    "base_url": "https://www.delonghi.com/",
+    "paths": [
+        "https://www.delonghi.com/de-de/manuals/produkte/kaffee/c/coffee"
+    ],
+    "layers": [
+        {
+            "html_tag": "div",
+            "html_class": "dln-categoryBox",
+            "css_selector" : ".dln-category-browser__category > div > a",
+            "filter": null
+        }
+    ],
+    "pdf":
+        {
+            "html_tag": null,
+            "html_class": null,
+            "css_selector": ".dln-instruction-manuals__list > li > a",
+            "filter" : [
+                {
+                    "condition_string": "Intro",
+                    "include_condition" : false
+                }
+            ]
+        },
+    "meta" :
+        {
+            "manual_name" : ".dln-instruction-manuals__list > li span:first-of-type",
+            "product_name" : ".dln-instruction-manuals__mainSubtitle"
+
+        }
+
+}

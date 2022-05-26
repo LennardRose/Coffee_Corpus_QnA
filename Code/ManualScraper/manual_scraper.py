@@ -7,8 +7,6 @@
 #####################################################################
 from typing import List
 
-
-
 import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -141,10 +139,11 @@ class ManualScraper:
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(soup.select(self.manual_config["meta"]["product_name"])[0].text)
-        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[number].text) #TODO gucken obs hier bricht
+        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[
+                                                     number].text)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
         meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
-        meta_data["language"] = None #TODO
+        meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
         meta_data["index_time"] = utils.date_now()
 
@@ -206,7 +205,7 @@ class ManualScraper:
             if self._is_valid(link, layer["filter"]):
 
                 if self._is_relative_URL(link):
-                    link = self.manual_config["base_url"] + link
+                    link = self.manual_config["base_url"] + link[1:]
 
                 links.append(link)
 
@@ -231,7 +230,7 @@ class ManualScraper:
             else:
                 link = self._search_direct_children_for_href(link)
 
-                if link != None:
+                if link is not None:
                     link_list.append(link)
 
         return link_list
@@ -246,13 +245,13 @@ class ManualScraper:
         tag_list = []
 
         # first try static page
-        soup = self._get_soup_of_static_page(URL)
+        soup = self._get_soup(URL)
 
         if soup:
-            if html_tag:
-                tag_list = soup.body.find_all(html_tag, html_class)
-            elif css_selector:
+            if css_selector:
                 tag_list = soup.body.select(css_selector)
+            elif html_tag:
+                tag_list = soup.body.find_all(html_tag, html_class)
 
         # if static doesnt work try dynamic
         if not tag_list:
@@ -286,6 +285,9 @@ class ManualScraper:
         if soup is None:
             soup = self._get_soup_of_dynamic_page(URL)
 
+            if soup is None:
+                logging.error("No soup could be cooked for" + URL + " !")
+
         return soup
 
 
@@ -307,7 +309,7 @@ class ManualScraper:
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
         if page:
-            return BeautifulSoup(page.content, 'html5lib')
+            return BeautifulSoup(page.content, 'lxml')
         else:
             return None
 
