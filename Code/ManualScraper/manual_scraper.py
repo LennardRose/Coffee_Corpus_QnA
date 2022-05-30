@@ -29,6 +29,7 @@ class ManualScraper:
         ssl._create_default_https_context = ssl._create_unverified_context
         self.driver = self._get_webdriver()
 
+
     def _get_webdriver(self):
         """
         returns a webdriver for selenium
@@ -53,6 +54,7 @@ class ManualScraper:
                           "current path: " + path)
             logging.error(e)
 
+
     def scrape(self, manual_config):
         """
         makes sure necessary properties are set in the manual_config
@@ -65,34 +67,35 @@ class ManualScraper:
         else:
             logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"])
 
-            links = []
-            links.append(manual_config["paths"])
+            links = [manual_config["paths"]]
 
-            # add a queue for every layer as well as one for the end
-            for _ in range(0, len(manual_config["layers"])):
-                links.append([])
+            if manual_config["layers"] and len(manual_config["layers"]) != 0:
 
-            # for each i, try the current layer to get new links, try these again with the current layer, if they stop
-            # yielding results, put them to the next i
-            # do not iterate over the last i
-            for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
-                while links[i]:
-                    old_link = links[i].pop(0)
-                    new_links = []
-                    new_links.extend(self._get_layer_links(old_link, manual_config["layers"][i]))
-                    # if the old link yielded new results append them and remove the old link (popped above)
-                    if new_links:
-                        links[i].extend(new_links)
-                    # if the link does not yielded results, try in the next iteration with the next layer
-                    else:
-                        # to the next layer, ultimatively the last one gets filled only with "product pages" or
-                        # the destination link on which the manuals are
-                        links[i + 1].append(old_link)
+                # add a queue for every layer as well as one for the end
+                for _ in range(0, len(manual_config["layers"])):
+                    links.append([])
+
+                # for each i, try the current layer to get new links, try these again with the current layer,
+                # if they stop yielding results put them to the next i do not iterate over the last i
+                for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
+                    while links[i]:
+                        old_link = links[i].pop(0)
+                        new_links = []
+                        new_links.extend(self._get_layer_links(old_link, manual_config["layers"][i]))
+                        # if the old link yielded new results append them and remove the old link (popped above)
+                        if new_links:
+                            links[i].extend(new_links)
+                        # if the link does not yielded results, try in the next iteration with the next layer
+                        else:
+                            # to the next layer, ultimatively the last one gets filled only with "product pages" or
+                            # the destination link on which the manuals are
+                            links[i + 1].append(old_link)
 
             self._save_manuals(links[-1])
 
         # clear manual config for next one
         self.manual_config = None
+
 
     def _save_manuals(self, URLs):
         """
@@ -123,6 +126,7 @@ class ManualScraper:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
 
+
     def _get_meta_data(self, URL, manual_link, number):
         """ TODO
             initializes meta_parser with necessary information, parses metadata and returns it
@@ -144,6 +148,7 @@ class ManualScraper:
         meta_data["index_time"] = utils.date_now()
 
         return meta_data
+
 
     def _save(self, manual_meta_data, content):
         """
@@ -173,6 +178,7 @@ class ManualScraper:
                 logging.error("failed to save Content with file_client")
                 logging.error(e)
                 client_factory.get_meta_client().delete_meta_data(current_id)
+
 
     def _get_layer_links(self, path, layer):
         """
@@ -207,6 +213,7 @@ class ManualScraper:
 
         return links
 
+
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
         collects all links from the specified URL that fits the html_tag html_class combination or the css_selector
@@ -227,6 +234,7 @@ class ManualScraper:
                     link_list.append(link)
 
         return link_list
+
 
     def _get_tag_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -262,8 +270,10 @@ class ManualScraper:
 
         return tag_list
 
+
     def _get_pdf_bytes(self, URL):
         return requests.get(URL).content
+
 
     def _get_soup(self, URL):
         """
@@ -279,6 +289,7 @@ class ManualScraper:
                 logging.error("No soup could be cooked for" + URL + " !")
 
         return soup
+
 
     def _get_soup_of_static_page(self, URL):
         """
@@ -302,6 +313,7 @@ class ManualScraper:
         else:
             return None
 
+
     def _get_soup_of_dynamic_page(self, URL):
         """
         extract content of dynamic loaded page
@@ -315,7 +327,7 @@ class ManualScraper:
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                #time.sleep(1)  # load page
+                # time.sleep(1)  # load page
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
@@ -327,6 +339,7 @@ class ManualScraper:
         else:
             return None
 
+
     def _search_direct_children_for_href(self, tag):
         """
         searches all children of a tag for a href, returns the first
@@ -336,6 +349,7 @@ class ManualScraper:
                 return child['href']
         else:
             return None
+
 
     def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
         """
@@ -349,6 +363,7 @@ class ManualScraper:
         else:
             return False
 
+
     def _is_relative_URL(self, URL):
         """
         checks if the given URL starts with http, to determine if it is a relative URL
@@ -357,6 +372,7 @@ class ManualScraper:
         :return: false if URL starts with http, otherwise true
         """
         return not bool(re.search("^http", URL))
+
 
     def _is_valid(self, URL, conditions):
         """
