@@ -29,7 +29,6 @@ class ManualScraper:
         ssl._create_default_https_context = ssl._create_unverified_context
         self.driver = self._get_webdriver()
 
-
     def _get_webdriver(self):
         """
         returns a webdriver for selenium
@@ -53,7 +52,6 @@ class ManualScraper:
                           "make sure you downloaded a driver and wrote the correct path to config, /"
                           "current path: " + path)
             logging.error(e)
-
 
     def scrape(self, manual_config):
         """
@@ -96,7 +94,6 @@ class ManualScraper:
         # clear manual config for next one
         self.manual_config = None
 
-
     def _save_manuals(self, URLs):
         """
         retrieves manuals from the product pages
@@ -126,7 +123,6 @@ class ManualScraper:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
 
-
     def _get_meta_data(self, URL, manual_link, number):
         """ TODO
             initializes meta_parser with necessary information, parses metadata and returns it
@@ -148,7 +144,6 @@ class ManualScraper:
         meta_data["index_time"] = utils.date_now()
 
         return meta_data
-
 
     def _save(self, manual_meta_data, content):
         """
@@ -178,7 +173,6 @@ class ManualScraper:
                 logging.error("failed to save Content with file_client")
                 logging.error(e)
                 client_factory.get_meta_client().delete_meta_data(current_id)
-
 
     def _get_layer_links(self, path, layer):
         """
@@ -213,7 +207,6 @@ class ManualScraper:
 
         return links
 
-
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
         collects all links from the specified URL that fits the html_tag html_class combination or the css_selector
@@ -234,7 +227,6 @@ class ManualScraper:
                     link_list.append(link)
 
         return link_list
-
 
     def _get_tag_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -257,10 +249,10 @@ class ManualScraper:
         if not tag_list:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
-                if html_tag:
-                    tag_list = soup.body.find_all(html_tag, html_class)
-                elif css_selector:
+                if css_selector:
                     tag_list = soup.body.select(css_selector)
+                elif html_tag:
+                    tag_list = soup.body.find_all(html_tag, html_class)
 
         # if still no result something must be wrong with the html_tag and html_class
         if not tag_list:
@@ -270,10 +262,8 @@ class ManualScraper:
 
         return tag_list
 
-
     def _get_pdf_bytes(self, URL):
         return requests.get(URL).content
-
 
     def _get_soup(self, URL):
         """
@@ -289,7 +279,6 @@ class ManualScraper:
                 logging.error("No soup could be cooked for" + URL + " !")
 
         return soup
-
 
     def _get_soup_of_static_page(self, URL):
         """
@@ -309,10 +298,9 @@ class ManualScraper:
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
         if page:
-            return BeautifulSoup(page.content, 'lxml')
+            return BeautifulSoup(page.content, 'html5lib')
         else:
             return None
-
 
     def _get_soup_of_dynamic_page(self, URL):
         """
@@ -323,21 +311,21 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page == None and retry_count < int(utils.config["MAX_TRY"]):
+        while page is None and retry_count < int(utils.config["MAX_TRY"]):
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                time.sleep(1)  # load page
+                #time.sleep(1)  # load page
+                page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
         self.driver.close()
         if page:
-            return BeautifulSoup(self.driver.page_source, 'html5lib')
+            return BeautifulSoup(page, 'html5lib')
         else:
             return None
-
 
     def _search_direct_children_for_href(self, tag):
         """
@@ -348,7 +336,6 @@ class ManualScraper:
                 return child['href']
         else:
             return None
-
 
     def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
         """
@@ -362,7 +349,6 @@ class ManualScraper:
         else:
             return False
 
-
     def _is_relative_URL(self, URL):
         """
         checks if the given URL starts with http, to determine if it is a relative URL
@@ -371,7 +357,6 @@ class ManualScraper:
         :return: false if URL starts with http, otherwise true
         """
         return not bool(re.search("^http", URL))
-
 
     def _is_valid(self, URL, conditions):
         """

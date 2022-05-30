@@ -1,0 +1,30 @@
+{
+  "manufacturer_name": "Melitta",
+  "base_url": "https://www.melitta.de/",
+  "paths": [
+    "beratung/service-tipps/bedienungsanleitungen/"
+  ],
+  "layers": [
+    {
+      "html_tag": null,
+      "html_class": null,
+      "css_selector": "p[class^=digital-publishing-fluid-text-35] > a",
+      "filter": [
+      {
+        "condition_string": "adobe",
+        "include_condition": false
+      }
+    ]
+    }
+  ],
+  "pdf": {
+    "html_tag": null,
+    "html_class": null,
+    "css_selector": "p[class^=digital-publishing-fluid-text-35] > a",
+    "filter": null
+  },
+  "meta": {
+    "manual_name": "p[class^=digital-publishing-fluid-text-35] > a",
+    "product_name": "p[class^=digital-publishing-fluid-text-35] > a"
+  }
+}
