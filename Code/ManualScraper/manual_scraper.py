@@ -140,13 +140,28 @@ class ManualScraper:
             :param soup: the soup of the url
             :return: the meta_data of the urls article
         """
+
+        # has to be here for the first paths, may come up with a clever solution ... or not
+        if self._is_relative_URL(URL):
+            source_URL = self.manual_config["base_url"] + URL
+        else:
+            source_URL = URL
+
         meta_data = {}
-        soup = self._get_soup(URL)
+        soup = self._get_soup(source_URL)
+
+        product_name = soup.select(self.manual_config["meta"]["product_name"])#
+        manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+        if product_name is None or manual_name == []:
+            soup = self._get_soup_of_dynamic_page(source_URL)
+            product_name = soup.select(self.manual_config["meta"]["product_name"])#[0].text
+            manual_name = soup.select(self.manual_config["meta"]["manual_name"])#[number].text
+        product_name = product_name[0].text
+        manual_name = manual_name[number].text
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
-        meta_data["product_name"] = utils.slugify(soup.select(self.manual_config["meta"]["product_name"])[0].text)
-        meta_data["manual_name"] = utils.slugify(soup.select(self.manual_config["meta"]["manual_name"])[
-                                                     number].text)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
+        meta_data["product_name"] = utils.slugify(product_name)
+        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
         meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
         meta_data["language"] = None  # TODO
@@ -197,7 +212,7 @@ class ManualScraper:
 
         links = []
 
-        # has to be here for the first paths, may come up with a clever soulution ... or not
+        # has to be here for the first paths, may come up with a clever solution ... or not
         if self._is_relative_URL(path):
             source_URL = self.manual_config["base_url"] + path
         else:
