@@ -1,0 +1,32 @@
+{
+    "manufacturer_name": "Krups",
+    "base_url": "https://www.krups.de/",
+    "paths": [
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Filterkaffeemaschinen/csc/Filter",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Kaffeevollautomaten/csc/FullAutomat",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
+    ],
+    "layers": [
+        {
+            "html_tag": null,
+            "html_class": null,
+            "css_selector" : "div[class=c__body] a",
+            "filter": null
+        }
+    ],
+    "pdf":
+        {
+            "html_tag": null,
+            "html_class": null,
+            "css_selector": "#ifu-list > sd-component-wrapper > div > div.c__component-wrapper-component.is-small-width.ng-star-inserted > sd-documents > ul > li:nth-child(1) > sd-document > sd-link > a",
+            "filter" : null
+        },
+		
+    "meta" :
+        {
+            "manual_name" : "#overview > sd-product-overview > div > div.c__content.col-24.col-l-9.col-m-12.offset-l-1 > div.c__title-wrapper.ng-star-inserted > div.c__ref-wrapper > p",
+            "product_name" : "#overview > sd-product-overview > div > div.c__content.col-24.col-l-9.col-m-12.offset-l-1 > div.c__title-wrapper.ng-star-inserted > div.c__ref-wrapper > p"
+        }
+
+}
