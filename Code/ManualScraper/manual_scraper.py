@@ -10,7 +10,6 @@ from typing import List
 import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -27,8 +26,15 @@ class ManualScraper:
     def __init__(self):
         self.manual_config = None
         ssl._create_default_https_context = ssl._create_unverified_context
+        self.driver = None
+
+    def initialize_scraper(self, manual_config):
+        self.manual_config = manual_config
         self.driver = self._get_webdriver()
 
+    def reset_scraper(self):
+        self.manual_config = None
+        self.driver.quit()
 
     def _get_webdriver(self):
         """
@@ -59,7 +65,7 @@ class ManualScraper:
         """
         makes sure necessary properties are set in the manual_config
         """
-        self.manual_config = manual_config
+        self.initialize_scraper(manual_config)
 
         if manual_config["base_url"] is None:
             logging.error("Missing url information to scrape from manual_config")
@@ -94,7 +100,7 @@ class ManualScraper:
             self._save_manuals(links[-1])
 
         # clear manual config for next one
-        self.manual_config = None
+        self.reset_scraper()
 
 
     def _save_manuals(self, URLs):
@@ -333,7 +339,7 @@ class ManualScraper:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
-        self.driver.close()
+        #self.driver.close()
         if page:
             return BeautifulSoup(page, 'html5lib')
         else:

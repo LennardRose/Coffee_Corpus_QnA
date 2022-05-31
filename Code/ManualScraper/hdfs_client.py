@@ -63,7 +63,7 @@ class MOCKHDFSClient(FileClient):
         """
         saves the content with a given filename as a file
         """
-
+        file_path = "./manuals/" + file_path
         os.makedirs(file_path, exist_ok=True)
         target = os.path.join(file_path, filename)
 
@@ -71,7 +71,7 @@ class MOCKHDFSClient(FileClient):
                 file.write(content)
 
 
-    def read_file(self, file_path, filename):
+    def read_file(self, filename, file_path=""):
         """
         opens the file by filename
         """
