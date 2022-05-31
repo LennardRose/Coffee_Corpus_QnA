@@ -1,0 +1,27 @@
+{
+    "manufacturer_name": "RussellHobbs",
+    "base_url": "https://en.russellhobbs.com/",
+    "paths": [
+        "products/coffee-makers"
+    ],
+    "layers": [
+        {
+            "html_tag": null,
+            "html_class": null,
+            "css_selector" : ".product_listing > a",
+            "filter": null
+        }
+    ],
+    "pdf":
+        {
+            "html_tag": null,
+            "html_class": null,
+            "css_selector": ".btn-outline:first-of-type > a",
+            "filter" : null
+        },
+    "meta" :
+        {
+            "manual_name" : "h1#productName",
+            "product_name" : "h1#productName"
+        }
+}
