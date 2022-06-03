@@ -8,7 +8,7 @@
   "pdf": {
     "html_tag": null,
     "html_class": null,
-    "css_selector": "p[class^=digital-publishing-fluid-text-35] > a",
+    "css_selector": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
     "filter": [
       {
         "condition_string": "adobe",
@@ -41,7 +41,7 @@
     ]
   },
   "meta": {
-    "manual_name": "p[class^=digital-publishing-fluid-text-35] > a",
-    "product_name": "p[class^=digital-publishing-fluid-text-35] > a"
+    "manual_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
+    "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])"
   }
 }
