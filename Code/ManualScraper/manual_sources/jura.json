@@ -1,0 +1,30 @@
+{
+  "manufacturer_name": "Jura",
+  "base_url": "https://www.jura.com/",
+  "paths": [
+    "https://de.jura.com/de/produkte-haushalt/kaffeevollautomaten"
+  ],
+  "layers": [
+    {
+      "html_tag": "a",
+      "html_class": "inner",
+      "css_selector": "a.inner",
+      "filter": null
+    }
+  ],
+  "pdf": {
+    "html_tag": "a",
+    "html_class": "block-manual",
+    "css_selector": "a.block-manual",
+    "filter": [
+      {
+        "condition_string": "short_manual",
+        "include_condition": false
+      }
+    ]
+  },
+  "meta": {
+    "manual_name": "h2.title",
+    "product_name": "h1.title"
+  }
+}
