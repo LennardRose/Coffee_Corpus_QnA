@@ -13,9 +13,9 @@
     }
   ],
   "pdf": {
-    "html_tag": "a",
-    "html_class": "block-manual",
-    "css_selector": "a.block-manual",
+    "html_tag": null,
+    "html_class": null,
+    "css_selector": "a[id^=pagelayout_0_pagetype_0_pagecontent_0_tabcontent_0_repManuals_repManualLanguages_0_hplManual]",
     "filter": [
       {
         "condition_string": "short_manual",
