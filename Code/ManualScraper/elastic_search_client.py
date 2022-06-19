@@ -107,7 +107,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
             result = []
             query = {
                 "_source":
-                    {"includes": ["url"]
+                    {"includes": ["URL"]
                      },
                 "query":
                     {"bool":
@@ -122,7 +122,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
             docs = self.es_client.search(index="manual_meta_data", body=query)
 
             for doc in docs["hits"]["hits"]:
-                result.append(doc["_source"]["url"])
+                result.append(doc["_source"]["URL"])
 
             return result
         except:
@@ -133,10 +133,87 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
         :return: the manual_meta_data index mapping
         """
-        # TODO einmal das json in ES indexieren und hier reinpasten
-        return {"mappings": {
-            "properties": {
-            }}}
+        return {
+            "mappings": {
+                "properties": {
+                    "URL": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "filename": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "filepath": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "index_time": {
+                        "type": "date"
+                    },
+                    "language": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "manual_name": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "manufacturer_name": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "product_name": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "source_URL": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 
 class MockElasticSearchClient(MetaClient, ManualClient):

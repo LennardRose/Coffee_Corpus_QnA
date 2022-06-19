@@ -6,6 +6,9 @@
 #                                                                   #
 #####################################################################
 import os
+
+from tqdm import tqdm
+
 from argument_parser_wrapper import ArgumentParserWrapper
 from manual_scraper import ManualScraper
 import logging
@@ -26,7 +29,7 @@ if __name__ == '__main__':
     scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
-    for source in parser.parse_data_from_arguments():
+    for source in tqdm(parser.parse_data_from_arguments(), desc="scrape source(s)"):
         scraper.scrape(source)
 
     logging.info("Close ManualScraper")

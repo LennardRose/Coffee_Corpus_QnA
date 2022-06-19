@@ -18,22 +18,24 @@ class HDFSClient(FileClient):
     HDFS Helper class
     """
 
+
     def __init__(self):
         """
         init function that creates an insecure hdfs client
         """
-        logging.info("Init HDFS client with url: %s : %s", utils.config["HDFS_URL"] , utils.config["HDFS_PORT"])
-        self.hdfs_client = PyWebHdfsClient(host=utils.config["HDFS_URL"], port=utils.config["HDFS_PORT"], user_name=utils.config["HDFS_USER"], timeout=1)
+        logging.info("Init HDFS client with url: %s : %s", utils.config["HDFS_URL"], utils.config["HDFS_PORT"])
+        self.hdfs_client = PyWebHdfsClient(host=utils.config["HDFS_URL"], port=utils.config["HDFS_PORT"],
+                                           user_name=utils.config["HDFS_USER"], timeout=1)
 
-    def read_file(self, file_path, filename):
+
+    def read_file(self, file_path):
         """
-        reads a file from the given file_path filename combination and returns it as json
-        :param file_path: the path the file, no filename here
-        :param filename: the name of the file to read
+        reads a file from the given file_path, including the filename  and returns it as json
+        :param file_path: the path the file, filename included
         :return: json presentation of the files content
         """
-        target_file = os.path.join(file_path, filename)
-        return json.loads(self.hdfs_client.read_file(target_file))
+        return json.loads(self.hdfs_client.read_file(file_path))
+
 
     def save_as_file(self, file_path, filename, content):
         """
@@ -45,7 +47,7 @@ class HDFSClient(FileClient):
         :param content: the content that will be saved in the file
         :return: nothing
         """
-    
+
         target_file_path = os.path.join(file_path, filename)
         success = self.hdfs_client.create_file(target_file_path, content, overwrite=True)
 
@@ -53,11 +55,11 @@ class HDFSClient(FileClient):
             raise Exception("failed to save content as file to hdfs")
 
 
-
 class MOCKHDFSClient(FileClient):
     """
     mock of hdfs, saves to local file system
     """
+
 
     def save_as_file(self, file_path, filename, content):
         """
@@ -68,18 +70,15 @@ class MOCKHDFSClient(FileClient):
         target = os.path.join(file_path, filename)
 
         with open(target, "wb") as file:
-                file.write(content)
+            file.write(content)
 
 
-    def read_file(self, filename, file_path=""):
+    def read_file(self, file_path):
         """
-        opens the file by filename
+        opens the file by filepath, icluding path and name
         """
         try:
-            
-            target_file = os.path.join(file_path, filename)
-
-            with open(target_file, "r") as file:
+            with open(file_path, "r") as file:
                 return json.load(file)
         except:
-            logging.error(target_file + " not found.")
+            logging.error(file_path + " not found.")

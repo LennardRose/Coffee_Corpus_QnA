@@ -20,25 +20,27 @@ def get_meta_client() -> MetaClient:
     returns a client for metadata
     """
     global _meta_client
-    if _meta_client == None:
+    if _meta_client is None:
         _meta_client = _read_client_from_config("META_CLIENT")
     return _meta_client
+
 
 def get_manual_client() -> ManualClient:
     """
     returns a client for article_configs
     """
     global _manual_client
-    if _manual_client == None:
+    if _manual_client is None:
         _manual_client = _read_client_from_config("MANUAL_CLIENT")
     return _manual_client
 
-def get_file_client( ) -> FileClient:
+
+def get_file_client() -> FileClient:
     """
     returns a client for files
     """
     global _file_client
-    if _file_client == None:
+    if _file_client is None:
         _file_client = _read_client_from_config("FILE_CLIENT")
     return _file_client
 

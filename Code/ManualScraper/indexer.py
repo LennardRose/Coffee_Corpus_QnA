@@ -2,6 +2,9 @@
 #####################################################################
 #                                                                   #
 #                     Lennard Rose 5122737                          #
+#                     Jochen Schmidt                                #
+#                     Marius Benkert                                #
+#                     Esther Ademoula                               #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
 #                           SS2022                                  #
 #                                                                   #

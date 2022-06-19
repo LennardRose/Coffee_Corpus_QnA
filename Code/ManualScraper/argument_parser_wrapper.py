@@ -49,7 +49,7 @@ class ArgumentParserWrapper:  # clap the sillables like a 3 year old
             data = client_factory.get_manual_client().get_all_manual_configs()
 
         for filename in args.filenames:
-            data.append(client_factory.get_file_client().read_file(filename=filename))
+            data.append(client_factory.get_file_client().read_file(file_path=filename))
 
         for id in args.manualclient_ids:
             data.append(client_factory.get_manual_client().get_manual_config(id))

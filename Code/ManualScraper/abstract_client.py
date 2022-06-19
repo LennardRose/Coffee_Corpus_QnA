@@ -41,5 +41,5 @@ class FileClient(ABC):
         logging.error("Method not implemented")
 
     @abstractmethod
-    def read_file(self, file_path, filename):
+    def read_file(self, file_path):
         logging.error("Method not implemented")

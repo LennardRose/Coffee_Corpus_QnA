@@ -1,4 +1,4 @@
-ELASTICSEARCH_URL = "localhost",
+"""ELASTICSEARCH_URL = "localhost",
 ELASTICSEARCH_PORT = "9200",
 HDFS_URL = "192.168.0.115",
 HDFS_PORT = "9870",
@@ -13,7 +13,8 @@ STANDARD_LOG_FILENAME = "manualscraper.log",
 WEBDRIVER_DIR = "drivers",
 WEBDRIVER_FILE = "chromedriver.exe",
 CLIENTS = {
-    "META_CLIENT": "mock_elastic",
-    "MANUAL_CLIENT": "mock_elastic",
+    "META_CLIENT": "elastic",
+    "MANUAL_CLIENT": "elastic",
     "FILE_CLIENT": "mock_hdfs"
 }
+"""

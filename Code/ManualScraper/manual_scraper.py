@@ -115,7 +115,7 @@ class ManualScraper:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
                 for i, manual_link in enumerate(manual_links):
-                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(manual_link,
+                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(self.manual_config["base_url"],
                                                                                                            self.manual_config[
                                                                                                                "manufacturer_name"])
 
@@ -166,7 +166,10 @@ class ManualScraper:
         meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
         meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
+        meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
+
+        print(meta_data)
 
         return meta_data
 

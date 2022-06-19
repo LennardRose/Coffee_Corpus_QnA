@@ -14,7 +14,7 @@
     {
       "html_tag": "div",
       "html_class": "dln-categoryBox",
-      "css_selector": ""div.dln-categoryBox > a",
+      "css_selector": "div.dln-categoryBox > a",
       "filter": null
     }
   ],
