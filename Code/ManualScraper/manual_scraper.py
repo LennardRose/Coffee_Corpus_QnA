@@ -150,12 +150,22 @@ class ManualScraper:
         meta_data = {}
         soup = self._get_soup(source_URL)
 
-        product_name = soup.select(self.manual_config["meta"]["product_name"])#
-        manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+        if soup:
+            product_name = soup.select(self.manual_config["meta"]["product_name"])  #
+            manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+
+        # if static doesnt work try dynamic
         if product_name is None or manual_name == []:
             soup = self._get_soup_of_dynamic_page(source_URL)
-            product_name = soup.select(self.manual_config["meta"]["product_name"])#[0].text
-            manual_name = soup.select(self.manual_config["meta"]["manual_name"])#[number].text
+            if soup:
+                product_name = soup.select(self.manual_config["meta"]["product_name"])  # [0].text
+                manual_name = soup.select(self.manual_config["meta"]["manual_name"])  # [number].text
+        # is valid works only on direct pdf urls -> extract hrefs from a tags, filter them
+        # and extract names from <a> if filter has allowed pdf url
+        # if not a list -> direct access to meta data?
+
+        #self._is_valid(link, layer["filter"]):
+
         product_name = product_name[0].text
         manual_name = manual_name[number].text
 

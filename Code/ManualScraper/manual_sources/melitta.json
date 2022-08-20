@@ -2,7 +2,7 @@
   "manufacturer_name": "Melitta",
   "base_url": "https://www.melitta.de/",
   "paths": [
-    "beratung/service-tipps/bedienungsanleitungen/"
+    "kaffeevollautomaten/service/bedienungsanleitungen/"
   ],
   "layers": [ ],
   "pdf": {
