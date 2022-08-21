@@ -42,6 +42,36 @@
   },
   "meta": {
     "manual_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
-    "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])"
+    "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
+    "filter": [
+      {
+        "condition_string": "adobe",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Aqua",
+        "include_condition": false
+      },
+      {
+        "condition_string": "AQUA",
+        "include_condition": false
+      },
+      {
+        "condition_string": "CREMIO",
+        "include_condition": false
+      },
+      {
+        "condition_string": "MOLINO",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Calibra",
+        "include_condition": false
+      },
+      {
+        "condition_string": "MyCup",
+        "include_condition": false
+      }
+    ]
   }
 }

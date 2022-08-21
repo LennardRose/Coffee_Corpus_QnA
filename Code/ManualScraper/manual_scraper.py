@@ -60,7 +60,6 @@ class ManualScraper:
                           "current path: " + path)
             logging.error(e)
 
-
     def scrape(self, manual_config):
         """
         makes sure necessary properties are set in the manual_config
@@ -102,7 +101,6 @@ class ManualScraper:
         # clear manual config for next one
         self.reset_scraper()
 
-
     def _save_manuals(self, URLs):
         """
         retrieves manuals from the product pages
@@ -114,10 +112,12 @@ class ManualScraper:
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
+                manual_links.reverse()
                 for i, manual_link in enumerate(manual_links):
-                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(self.manual_config["base_url"],
-                                                                                                           self.manual_config[
-                                                                                                               "manufacturer_name"])
+                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
+                        self.manual_config["base_url"],
+                        self.manual_config[
+                            "manufacturer_name"])
 
                     if not self._was_already_saved(most_recent_saved_articles_url, URL):
                         # save element
@@ -131,7 +131,6 @@ class ManualScraper:
             except Exception as e:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
-
 
     def _get_meta_data(self, URL, manual_link, number):
         """ TODO
@@ -164,14 +163,22 @@ class ManualScraper:
         # and extract names from <a> if filter has allowed pdf url
         # if not a list -> direct access to meta data?
 
-        #self._is_valid(link, layer["filter"]):
+        # self._is_valid(link, layer["filter"]):
+        if self.manual_config["meta"]["filter"] is not None:
+            filteredStuff = []
+            for tag in product_name:
+                if not self._is_valid(tag["href"], self.manual_config["meta"]["filter"]):
+                    continue
+                filteredStuff.append(tag)
+            product_name = filteredStuff
 
-        product_name = product_name[0].text
+        product_name = product_name[number].text
         manual_name = manual_name[number].text
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(product_name)
-        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
+        meta_data["manual_name"] = utils.slugify(
+            manual_name)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
         meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
         meta_data["language"] = None  # TODO
@@ -182,7 +189,6 @@ class ManualScraper:
         print(meta_data)
 
         return meta_data
-
 
     def _save(self, manual_meta_data, content):
         """
@@ -212,7 +218,6 @@ class ManualScraper:
                 logging.error("failed to save Content with file_client")
                 logging.error(e)
                 client_factory.get_meta_client().delete_meta_data(current_id)
-
 
     def _get_layer_links(self, path, layer):
         """
@@ -244,9 +249,9 @@ class ManualScraper:
                 links.append(link)
 
         links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        #TODO brauchen wir das wirklich reversed?
 
         return links
-
 
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -268,7 +273,6 @@ class ManualScraper:
                     link_list.append(link)
 
         return link_list
-
 
     def _get_tag_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -304,10 +308,8 @@ class ManualScraper:
 
         return tag_list
 
-
     def _get_pdf_bytes(self, URL):
         return requests.get(URL).content
-
 
     def _get_soup(self, URL):
         """
@@ -323,7 +325,6 @@ class ManualScraper:
                 logging.error("No soup could be cooked for" + URL + " !")
 
         return soup
-
 
     def _get_soup_of_static_page(self, URL):
         """
@@ -347,7 +348,6 @@ class ManualScraper:
         else:
             return None
 
-
     def _get_soup_of_dynamic_page(self, URL):
         """
         extract content of dynamic loaded page
@@ -367,12 +367,11 @@ class ManualScraper:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
-        #self.driver.close()
+        # self.driver.close()
         if page:
             return BeautifulSoup(page, 'html5lib')
         else:
             return None
-
 
     def _search_direct_children_for_href(self, tag):
         """
@@ -383,7 +382,6 @@ class ManualScraper:
                 return child['href']
         else:
             return None
-
 
     def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
         """
@@ -397,7 +395,6 @@ class ManualScraper:
         else:
             return False
 
-
     def _is_relative_URL(self, URL):
         """
         checks if the given URL starts with http, to determine if it is a relative URL
@@ -406,7 +403,6 @@ class ManualScraper:
         :return: false if URL starts with http, otherwise true
         """
         return not bool(re.search("^http", URL))
-
 
     def _is_valid(self, URL, conditions):
         """
