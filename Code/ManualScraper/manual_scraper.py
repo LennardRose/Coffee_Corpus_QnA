@@ -157,36 +157,38 @@ class ManualScraper:
         if product_name is None or manual_name == []:
             soup = self._get_soup_of_dynamic_page(source_URL)
             if soup:
-                product_name = soup.select(self.manual_config["meta"]["product_name"])  # [0].text
-                manual_name = soup.select(self.manual_config["meta"]["manual_name"])  # [number].text
-        # is valid works only on direct pdf urls -> extract hrefs from a tags, filter them
-        # and extract names from <a> if filter has allowed pdf url
-        # if not a list -> direct access to meta data?
+                product_name = soup.select(self.manual_config["meta"]["product_name"])
+                manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
-        # self._is_valid(link, layer["filter"]):
-        if self.manual_config["meta"]["filter"] is not None:
+        if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
             filteredStuff = []
             for tag in product_name:
                 if not self._is_valid(tag["href"], self.manual_config["meta"]["filter"]):
                     continue
                 filteredStuff.append(tag)
             product_name = filteredStuff
-
-        product_name = product_name[number].text
+        #TODO könnte hier für nicht listen cases brechen
+        product_name = product_name[number % len(product_name)].text
         manual_name = manual_name[number].text
+
+        if "transform" in self.manual_config["meta"].keys():
+            product_name = re.match(self.manual_config["meta"]["transform"], product_name).group(0)
+            manual_name = re.match(self.manual_config["meta"]["transform"], manual_name).group(0)
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(product_name)
-        meta_data["manual_name"] = utils.slugify(
-            manual_name)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
+        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+        if meta_data["product_name"] != meta_data["manual_name"]:
+            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+        else:
+            meta_data["filename"] = str(meta_data["manual_name"]) + ".pdf"
         meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
         meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
 
-        print(meta_data)
+        print("\n", meta_data)
 
         return meta_data
 

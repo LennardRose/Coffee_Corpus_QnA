@@ -1,6 +1,6 @@
 {
   "manufacturer_name": "Braun",
-  "base_url": "https://www.braunhousehold.com/de-de/",
+  "base_url": "https://www.braunhousehold.com/",
   "paths": [
     "https://www.braunhousehold.com/de-de/manuals/produkte/fruehstueck/kaffeemaschinen/aromaster-kaffeemaschinen/c/aromaster_coffee_machines",
 	"https://www.braunhousehold.com/de-de/manuals/produkte/fruehstueck/kaffeemaschinen/puraroma-7/c/puraroma_7",
@@ -22,12 +22,7 @@
     "html_tag": null,
     "html_class": null,
     "css_selector": "ul.dln-instruction-manuals__list a",
-    "filter": [
-      {
-        "condition_string": "Instruction manuals",
-        "include_condition": true
-      }
-    ]
+    "filter": null
   },
   "meta": {
     "manual_name": "span.dln-instruction-manuals__listText--title",
