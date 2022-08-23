@@ -47,6 +47,7 @@
   "meta": {
     "manual_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
     "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
+    "transform": "[^(]*",
     "filter": [
       {
         "condition_string": "adobe",
@@ -76,7 +77,6 @@
         "condition_string": "MyCup",
         "include_condition": false
       }
-    ],
-    "transform": "[^(]*"
+    ]
   }
 }

@@ -19,6 +19,7 @@ import logging
 import ssl
 import os
 from tqdm import tqdm
+import time
 
 
 class ManualScraper:
@@ -85,8 +86,7 @@ class ManualScraper:
                 for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
                     while links[i]:
                         old_link = links[i].pop(0)
-                        new_links = []
-                        new_links.extend(self._get_layer_links(old_link, manual_config["layers"][i]))
+                        new_links = self._get_layer_links(old_link, manual_config["layers"][i])
                         # if the old link yielded new results append them and remove the old link (popped above)
                         if new_links:
                             links[i].extend(new_links)
@@ -179,16 +179,15 @@ class ManualScraper:
         meta_data["product_name"] = utils.slugify(product_name)
         meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        if meta_data["product_name"] != meta_data["manual_name"]:
-            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
-        else:
+        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
             meta_data["filename"] = str(meta_data["manual_name"]) + ".pdf"
+        else:
+            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+
         meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
         meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
-
-        print("\n", meta_data)
 
         return meta_data
 
@@ -363,7 +362,7 @@ class ManualScraper:
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                # time.sleep(1)  # load page
+                time.sleep(0.5)  # load page
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
