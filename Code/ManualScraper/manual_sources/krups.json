@@ -2,14 +2,19 @@
     "manufacturer_name": "Krups",
     "base_url": "https://www.krups.de/",
     "paths": [
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso"
+        "bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
     ],
+    "sleepTime": 2,
     "layers": [
         {
             "html_tag": null,
             "html_class": null,
             "css_selector" : "div[class=c__body] a",
             "filter": [
+                {
+                    "condition_string": "Zubeh%C3%B6r",
+                    "include_condition": false
+                },
                 {
                     "condition_string": "abtropffach",
                     "include_condition": false
@@ -19,7 +24,11 @@
                     "include_condition": false
                 },
                 {
-                    "condition_string": "filter",
+                    "condition_string": "2-filter",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "filtereinsatz",
                     "include_condition": false
                 },
                 {
@@ -32,6 +41,14 @@
                 },
                 {
                     "condition_string": "tropfschale",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "kaffeekanne-deckel",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "teefilter",
                     "include_condition": false
                 }
             ]
@@ -58,7 +75,7 @@
         {
             "manual_name" : "p.c__ref.is-caption.ng-star-inserted",
             "product_name" : "p.c__ref.is-caption.ng-star-inserted",
-            "transform": "[[:space:]](.+)"
+            "transform": "([\\S]+).$"
         }
 
 }

@@ -1,0 +1,5 @@
+- manual names falsch bei melitta
+- filtering nach product/manual names nicht nach href im meta data
+- pdf nicht scrapen wenn z.B. manual name nicht manual sondern "hinweise" oder so
+- miele ist ne bitch
+- philipps ganz gut jetzt

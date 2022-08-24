@@ -1,6 +1,7 @@
 {
   "manufacturer_name": "Miele",
   "base_url": "https://www.miele.de/",
+  "sleepTime": 5,
   "paths": [
     "https://www.miele.de/haushalt/produktauswahl-kaffeevollautomaten-2513.htm"
   ],
@@ -15,11 +16,11 @@
   "pdf": {
     "html_tag": null,
     "html_class": null,
-    "css_selector": ".tabContent.delimiter-blank-small-top.delimiter-blank-bottom.active-slide table tbody tr:last-child a",
+    "css_selector": "div.tabContent.delimiter-blank-small-top.delimiter-blank-bottom table tbody tr:nth-child(2) a",
     "filter": null
   },
   "meta": {
-    "manual_name": ".tabContent.delimiter-blank-small-top.delimiter-blank-bottom.active-slide table tbody tr:last-child td:first-child",
+    "manual_name": "div.tabContent.delimiter-blank-small-top.delimiter-blank-bottom table tbody tr:nth-child(2) td:first-child",
     "product_name": "h1 > strong"
   }
 }

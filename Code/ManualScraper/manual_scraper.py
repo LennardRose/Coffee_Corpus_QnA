@@ -89,7 +89,7 @@ class ManualScraper:
                         new_links = self._get_layer_links(old_link, manual_config["layers"][i])
                         # if the old link yielded new results append them and remove the old link (popped above)
                         if new_links:
-                            links[i].extend(new_links)
+                            links[i].extend(set(new_links))
                         # if the link does not yielded results, try in the next iteration with the next layer
                         else:
                             # to the next layer, ultimatively the last one gets filled only with "product pages" or
@@ -162,27 +162,30 @@ class ManualScraper:
 
         if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
             filteredStuff = []
-            for tag in product_name:
-                if not self._is_valid(tag["href"], self.manual_config["meta"]["filter"]):
+            for productTag in product_name:
+                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
                     continue
-                filteredStuff.append(tag)
+                filteredStuff.append(productTag)
             product_name = filteredStuff
-        #TODO könnte hier für nicht listen cases brechen
+
         product_name = product_name[number % len(product_name)].text
-        manual_name = manual_name[number].text
+        manual_name = manual_name[number % len(manual_name)].text
 
         if "transform" in self.manual_config["meta"].keys():
-            product_name = re.match(self.manual_config["meta"]["transform"], product_name).group(0)
-            manual_name = re.match(self.manual_config["meta"]["transform"], manual_name).group(0)
+            product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
+            manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(product_name)
         meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
+        filetype = os.path.splitext(manual_link)[1]
+        if filetype == "":
+            filetype = ".pdf"
         if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
-            meta_data["filename"] = str(meta_data["manual_name"]) + ".pdf"
+            meta_data["filename"] = str(meta_data["manual_name"]) + filetype
         else:
-            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
 
         meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
@@ -229,7 +232,7 @@ class ManualScraper:
         :return: a list with all valid links on the page
         """
 
-        links = []
+        links = set()
 
         # has to be here for the first paths, may come up with a clever solution ... or not
         if self._is_relative_URL(path):
@@ -252,7 +255,7 @@ class ManualScraper:
         links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
         #TODO brauchen wir das wirklich reversed?
 
-        return links
+        return list(links)
 
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -293,7 +296,10 @@ class ManualScraper:
                 tag_list = soup.body.find_all(html_tag, html_class)
 
         # if static doesnt work try dynamic
-        if not tag_list:
+        onlyDynamic = False
+        if "onlyDynamic" in self.manual_config.keys():
+            onlyDynamic = True
+        if not tag_list and not onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
                 if css_selector:
@@ -319,7 +325,12 @@ class ManualScraper:
         """
         soup = self._get_soup_of_static_page(URL)
 
-        if soup is None:
+        # for example philipps needs to be dynamic soup by default as static only retrieves a few
+        onlyDynamic = False
+        if "onlyDynamic" in self.manual_config.keys():
+            onlyDynamic = True
+
+        if soup is None or onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
 
             if soup is None:
@@ -362,7 +373,8 @@ class ManualScraper:
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                time.sleep(0.5)  # load page
+                if "sleepTime" in self.manual_config.keys():
+                    time.sleep(self.manual_config["sleepTime"])  # load page
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
