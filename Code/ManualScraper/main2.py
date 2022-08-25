@@ -27,7 +27,7 @@ if __name__ == '__main__':
     scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
-    with open("./manual_sources/melitta.json", "r") as file:
+    with open("./manual_sources/philipps.json", "r") as file:
         source = json.load(file)
         scraper.scrape(source)
 

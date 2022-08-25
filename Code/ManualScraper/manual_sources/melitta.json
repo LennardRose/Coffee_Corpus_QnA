@@ -74,7 +74,15 @@
         "include_condition": false
       },
       {
+        "condition_string": "CALIBRA",
+        "include_condition": false
+      },
+      {
         "condition_string": "MyCup",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Connect App",
         "include_condition": false
       }
     ]

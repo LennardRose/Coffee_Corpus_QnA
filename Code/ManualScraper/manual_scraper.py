@@ -150,7 +150,7 @@ class ManualScraper:
         soup = self._get_soup(source_URL)
 
         if soup:
-            product_name = soup.select(self.manual_config["meta"]["product_name"])  #
+            product_name = soup.select(self.manual_config["meta"]["product_name"])
             manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
         # if static doesnt work try dynamic
@@ -161,12 +161,15 @@ class ManualScraper:
                 manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
         if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
-            filteredStuff = []
-            for productTag in product_name:
-                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
+            filteredProductNames = []
+            filteredManualNames = []
+            for i, manualTag in enumerate(manual_name):
+                if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
                     continue
-                filteredStuff.append(productTag)
-            product_name = filteredStuff
+                filteredManualNames.append(manualTag)
+                filteredProductNames.append(product_name[i])
+            product_name = filteredProductNames
+            manual_name = filteredManualNames
 
         product_name = product_name[number % len(product_name)].text
         manual_name = manual_name[number % len(manual_name)].text
@@ -250,12 +253,13 @@ class ManualScraper:
                 if self._is_relative_URL(link):
                     link = self.manual_config["base_url"] + link[1:]
 
-                links.append(link)
+                links.add(link)
 
+        links = list(links)
         links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
         #TODO brauchen wir das wirklich reversed?
 
-        return list(links)
+        return links
 
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
