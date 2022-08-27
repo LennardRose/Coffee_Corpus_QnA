@@ -1,11 +1,4 @@
-- manual names falsch bei melitta - fixed
-- melitta nach filterung ungleiche anzahl an elementen - fixed
-- melitta filterung von meta nochmal prüfen
-- philipps testen (zip, manual name filtering)
-
-- filtering nach product/manual names nicht nach href im meta data
-
-- pdf nicht scrapen wenn z.B. manual name nicht manual sondern "hinweise" oder so
+- philipps testen (zip, manual name filtering) - check?
+- TODO: pdf nicht scrapen wenn z.B. manual name nicht manual sondern "hinweise" oder so - check
 
 - miele ist ne bitch
-

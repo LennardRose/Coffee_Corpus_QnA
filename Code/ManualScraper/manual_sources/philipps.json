@@ -3,8 +3,8 @@
   "base_url": "https://www.philips.de/",
   "onlyDynamic": true,
   "paths": [
-    "https://www.philips.de/c-m-ho/kaffee/neueste#availability=all&filters=SENSEO_SU%2CBEANTOCUP_SU2%2CPORTIONED_ESPRESSO_SU2%2CSUPER_AUTOMATIC_ESPRESSO_SU&layout=12"
-
+    "https://www.philips.de/c-m-ho/kaffee/neueste#availability=all&filters=SENSEO_SU%2CBEANTOCUP_SU2%2CPORTIONED_ESPRESSO_SU2%2CSUPER_AUTOMATIC_ESPRESSO_SU&layout=96",
+    "https://www.philips.de/c-m-ho/kaffee/neueste#availability=all&filters=SENSEO_SU%2CBEANTOCUP_SU2%2CPORTIONED_ESPRESSO_SU2%2CSUPER_AUTOMATIC_ESPRESSO_SU&page=1&layout=96"
   ],
   "layers": [
     {
@@ -85,6 +85,10 @@
       },
       {
         "condition_string" : "Landesspezifische Werbebroschüre",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Important Information Manual",
         "include_condition": false
       }
     ]

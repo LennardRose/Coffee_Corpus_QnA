@@ -95,7 +95,9 @@ class ManualScraper:
                             # to the next layer, ultimatively the last one gets filled only with "product pages" or
                             # the destination link on which the manuals are
                             links[i + 1].append(old_link)
-
+            # final duplicate filtering:
+            links[-1] = list(set(links[-1]))
+            # TODO links direkt als set machen? spart zusätzliches scrapen
             self._save_manuals(links[-1])
 
         # clear manual config for next one
@@ -112,7 +114,7 @@ class ManualScraper:
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
-                manual_links.reverse()
+
                 for i, manual_link in enumerate(manual_links):
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
                         self.manual_config["base_url"],
@@ -120,12 +122,16 @@ class ManualScraper:
                             "manufacturer_name"])
 
                     if not self._was_already_saved(most_recent_saved_articles_url, URL):
+                        try:
+                            meta_data = self._get_meta_data(URL, manual_link, i)
+                        except IndexError:
+                            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+                            # -> index access returns Index error as flag for skipping
+                            # next manual link
+                            continue
+                        fileBytes = self._get_pdf_bytes(manual_link)
                         # save element
                         logging.info("Save content of: " + manual_link)
-
-                        meta_data = self._get_meta_data(URL, manual_link, i)
-                        fileBytes = self._get_pdf_bytes(manual_link)
-
                         self._save(meta_data, fileBytes)
 
             except Exception as e:
@@ -163,16 +169,25 @@ class ManualScraper:
         if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
             filteredProductNames = []
             filteredManualNames = []
-            for i, manualTag in enumerate(manual_name):
+            #landesspezifische werbebroschüre kommt durch - why?
+            for manualTag in manual_name:
                 if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
                     continue
                 filteredManualNames.append(manualTag)
-                filteredProductNames.append(product_name[i])
+
+            for productTag in product_name:
+                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
+                    continue
+                filteredProductNames.append(productTag)
+
             product_name = filteredProductNames
             manual_name = filteredManualNames
 
         product_name = product_name[number % len(product_name)].text
-        manual_name = manual_name[number % len(manual_name)].text
+        manual_name = manual_name[number].text
+        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
+
 
         if "transform" in self.manual_config["meta"].keys():
             product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
@@ -235,7 +250,7 @@ class ManualScraper:
         :return: a list with all valid links on the page
         """
 
-        links = set()
+        links = []
 
         # has to be here for the first paths, may come up with a clever solution ... or not
         if self._is_relative_URL(path):
@@ -253,11 +268,10 @@ class ManualScraper:
                 if self._is_relative_URL(link):
                     link = self.manual_config["base_url"] + link[1:]
 
-                links.add(link)
+                links.append(link)
 
-        links = list(links)
-        links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
-        #TODO brauchen wir das wirklich reversed?
+        #links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        ##TODO brauchen wir das wirklich reversed?
 
         return links
 
