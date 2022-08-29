@@ -1,6 +1,7 @@
 {
   "manufacturer_name": "Jura",
   "base_url": "https://www.jura.com/",
+  "onlyDynamic": false,
   "paths": [
     "https://de.jura.com/de/produkte-haushalt/kaffeevollautomaten"
   ],

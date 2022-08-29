@@ -1,6 +1,7 @@
 {
     "manufacturer_name": "Delonghi",
     "base_url": "https://www.delonghi.com/",
+    "onlyDynamic": false,
     "paths": [
         "de-de/manuals/produkte/kaffee/siebtraegermaschinen-und-espressomaschinen/c/manual_espresso_makers",
         "de-de/manuals/produkte/kaffee/kaffeevollautomaten/c/automatic_coffee_makers",

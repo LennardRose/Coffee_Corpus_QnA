@@ -1,4 +1,0 @@
-- philipps testen (zip, manual name filtering) - check?
-- TODO: pdf nicht scrapen wenn z.B. manual name nicht manual sondern "hinweise" oder so - check
-
-- miele ist ne bitch

@@ -1,7 +1,7 @@
-
 {
     "manufacturer_name": "Rancilio",
     "base_url": "https://support.ranciliogroup.com/",
+    "onlyDynamic": false,
     "paths": [
         "de-de/doc/home-line/handbucher/#document-type-selector",
         "de-de/doc/rancilio/handbucher/#document-type-selector",

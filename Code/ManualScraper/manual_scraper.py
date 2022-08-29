@@ -83,7 +83,7 @@ class ManualScraper:
 
                 # for each i, try the current layer to get new links, try these again with the current layer,
                 # if they stop yielding results put them to the next i do not iterate over the last i
-                for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
+                for i in tqdm(range(0, len(links) - 1), desc="Search products by layers"):
                     while links[i]:
                         old_link = links[i].pop(0)
                         new_links = self._get_layer_links(old_link, manual_config["layers"][i])
@@ -110,7 +110,7 @@ class ManualScraper:
         saves all data
         :param URLs: An iterable with all the product pages URLs
         """
-        for URL in tqdm(URLs, desc="pdfs saved"):
+        for URL in tqdm(URLs, desc="scraping "+str(len(URLs))+" products"):
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
@@ -134,6 +134,8 @@ class ManualScraper:
                         logging.info("Save content of: " + manual_link)
                         self._save(meta_data, fileBytes)
 
+            except ZeroDivisionError as e:
+                logging.error("No metadata found for " + URL)
             except Exception as e:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
@@ -160,7 +162,7 @@ class ManualScraper:
             manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
         # if static doesnt work try dynamic
-        if product_name is None or manual_name == []:
+        if product_name == [] or manual_name == []:
             soup = self._get_soup_of_dynamic_page(source_URL)
             if soup:
                 product_name = soup.select(self.manual_config["meta"]["product_name"])
@@ -190,12 +192,16 @@ class ManualScraper:
 
 
         if "transform" in self.manual_config["meta"].keys():
-            product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
-            manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
+            result = re.search(self.manual_config["meta"]["transform"], product_name.lstrip())
+            if result is not None:
+                product_name = result.group(0)
+            result = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip())
+            if result is not None:
+                manual_name = result.group(0)
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(product_name)
-        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
+        meta_data["manual_name"] = utils.slugify(manual_name)
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
         filetype = os.path.splitext(manual_link)[1]
         if filetype == "":
@@ -316,7 +322,7 @@ class ManualScraper:
         # if static doesnt work try dynamic
         onlyDynamic = False
         if "onlyDynamic" in self.manual_config.keys():
-            onlyDynamic = True
+            onlyDynamic = self.manual_config["onlyDynamic"]
         if not tag_list and not onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
