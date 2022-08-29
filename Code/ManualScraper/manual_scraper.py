@@ -134,10 +134,8 @@ class ManualScraper:
                         logging.info("Save content of: " + manual_link)
                         self._save(meta_data, fileBytes)
 
-            except ZeroDivisionError as e:
-                logging.error("No metadata found for " + URL)
             except Exception as e:
-                logging.error("Something went wrong while trying to save: " + URL)
+                logging.error("No metadata found for " + URL)
                 logging.error(e)
 
     def _get_meta_data(self, URL, manual_link, number):
