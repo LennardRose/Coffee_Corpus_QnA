@@ -147,15 +147,15 @@ class ManualScraper:
             :param soup: the soup of the url
             :return: the meta_data of the urls article
         """
+        try:
+            # has to be here for the first paths, may come up with a clever solution ... or not
+            if self._is_relative_URL(URL):
+                source_URL = self.manual_config["base_url"] + URL
+            else:
+                source_URL = URL
 
-        # has to be here for the first paths, may come up with a clever solution ... or not
-        if self._is_relative_URL(URL):
-            source_URL = self.manual_config["base_url"] + URL
-        else:
-            source_URL = URL
-
-        meta_data = {}
-        soup = self._get_soup(source_URL)
+            meta_data = {}
+            soup = self._get_soup(source_URL)
 
         if soup:
             product_name = soup.select(self.manual_config["meta"]["product_name"])
@@ -164,6 +164,7 @@ class ManualScraper:
         # if static doesnt work try dynamic
         if product_name == [] or manual_name == []:
             soup = self._get_soup_of_dynamic_page(source_URL)
+
             if soup:
                 product_name = soup.select(self.manual_config["meta"]["product_name"])
                 manual_name = soup.select(self.manual_config["meta"]["manual_name"])
@@ -171,7 +172,6 @@ class ManualScraper:
         if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
             filteredProductNames = []
             filteredManualNames = []
-            #landesspezifische werbebroschüre kommt durch - why?
             for manualTag in manual_name:
                 if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
                     continue
@@ -217,6 +217,8 @@ class ManualScraper:
         meta_data["index_time"] = utils.date_now()
 
         return meta_data
+        except Exception as e:
+            logging.error("could not fetch meta data from URL: " + URL + "\n" + "Product: " + product_name + " exception: " + str(e))
 
     def _save(self, manual_meta_data, content):
         """

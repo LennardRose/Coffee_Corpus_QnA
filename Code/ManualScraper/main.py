@@ -13,6 +13,7 @@ from argument_parser_wrapper import ArgumentParserWrapper
 from manual_scraper import ManualScraper
 import logging
 import utils
+import sys
 
 if __name__ == '__main__':
 
@@ -23,6 +24,7 @@ if __name__ == '__main__':
                         format=utils.config["STANDARD_LOG_FORMAT"],
                         datefmt=utils.config["STANDARD_LOG_DATE_FORMAT"],
                         level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     logging.info("Start ManualScraper")
 
