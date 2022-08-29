@@ -3,7 +3,10 @@
     "base_url": "https://www.krups.de/",
     "onlyDynamic": false,
     "paths": [
-        "bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
+        "bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Filterkaffeemaschinen/csc/Filter",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Kaffeevollautomaten/csc/FullAutomat",
+		"bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
     ],
     "sleepTime": 2,
     "layers": [
