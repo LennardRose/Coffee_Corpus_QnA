@@ -145,15 +145,15 @@ class ManualScraper:
             :param soup: the soup of the url
             :return: the meta_data of the urls article
         """
-        try:
-            # has to be here for the first paths, may come up with a clever solution ... or not
-            if self._is_relative_URL(URL):
-                source_URL = self.manual_config["base_url"] + URL
-            else:
-                source_URL = URL
 
-            meta_data = {}
-            soup = self._get_soup(source_URL)
+        # has to be here for the first paths, may come up with a clever solution ... or not
+        if self._is_relative_URL(URL):
+            source_URL = self.manual_config["base_url"] + URL
+        else:
+            source_URL = URL
+
+        meta_data = {}
+        soup = self._get_soup(source_URL)
 
         if soup:
             product_name = soup.select(self.manual_config["meta"]["product_name"])
@@ -209,14 +209,11 @@ class ManualScraper:
         else:
             meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
 
-        meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
         meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
 
         return meta_data
-        except Exception as e:
-            logging.error("could not fetch meta data from URL: " + URL + "\n" + "Product: " + product_name + " exception: " + str(e))
 
     def _save(self, manual_meta_data, content):
         """
@@ -258,7 +255,6 @@ class ManualScraper:
 
         links = []
 
-        # has to be here for the first paths, may come up with a clever solution ... or not
         if self._is_relative_URL(path):
             source_URL = self.manual_config["base_url"] + path
         else:
@@ -275,9 +271,6 @@ class ManualScraper:
                     link = self.manual_config["base_url"] + link[1:]
 
                 links.append(link)
-
-        #links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
-        ##TODO brauchen wir das wirklich reversed?
 
         return links
 
@@ -352,7 +345,7 @@ class ManualScraper:
         # for example philipps needs to be dynamic soup by default as static only retrieves a few
         onlyDynamic = False
         if "onlyDynamic" in self.manual_config.keys():
-            onlyDynamic = True
+            onlyDynamic = self.manual_config["onlyDynamic"]
 
         if soup is None or onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
