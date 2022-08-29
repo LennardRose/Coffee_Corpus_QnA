@@ -1,8 +1,11 @@
 #####################################################################
 #                                                                   #
 #                     Lennard Rose 5122737                          #
+#                     Jochen Schmidt 5122xxx                        #
+#                     Esther Ademola 5122xxx                        #
+#                     Marius Benkert 5122xxx                        #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
-#                           SS2021                                  #
+#                           SS2022                                  #
 #                                                                   #
 #####################################################################
 from datetime import datetime, date

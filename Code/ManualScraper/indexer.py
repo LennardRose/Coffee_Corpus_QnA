@@ -1,10 +1,9 @@
-# import glob and os
 #####################################################################
 #                                                                   #
 #                     Lennard Rose 5122737                          #
-#                     Jochen Schmidt                                #
-#                     Marius Benkert                                #
-#                     Esther Ademoula                               #
+#                     Jochen Schmidt 5122xxx                        #
+#                     Esther Ademola 5122xxx                        #
+#                     Marius Benkert 5122xxx                        #
 #       University of Applied Sciences Wuerzburg Schweinfurt        #
 #                           SS2022                                  #
 #                                                                   #
