@@ -145,72 +145,74 @@ class ManualScraper:
             :param soup: the soup of the url
             :return: the meta_data of the urls article
         """
+        try:
+            # has to be here for the first paths, may come up with a clever solution ... or not
+            if self._is_relative_URL(URL):
+                source_URL = self.manual_config["base_url"] + URL
+            else:
+                source_URL = URL
 
-        # has to be here for the first paths, may come up with a clever solution ... or not
-        if self._is_relative_URL(URL):
-            source_URL = self.manual_config["base_url"] + URL
-        else:
-            source_URL = URL
+            meta_data = {}
+            soup = self._get_soup(source_URL)
 
-        meta_data = {}
-        soup = self._get_soup(source_URL)
-
-        if soup:
-            product_name = soup.select(self.manual_config["meta"]["product_name"])
-            manual_name = soup.select(self.manual_config["meta"]["manual_name"])
-
-        # if static doesnt work try dynamic
-        if product_name is None or manual_name == []:
-            soup = self._get_soup_of_dynamic_page(source_URL)
             if soup:
                 product_name = soup.select(self.manual_config["meta"]["product_name"])
                 manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
-        if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
-            filteredProductNames = []
-            filteredManualNames = []
-            #landesspezifische werbebroschüre kommt durch - why?
-            for manualTag in manual_name:
-                if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
-                    continue
-                filteredManualNames.append(manualTag)
+            # if static doesnt work try dynamic
+            if product_name is None or manual_name == []:
+                soup = self._get_soup_of_dynamic_page(source_URL)
+                if soup:
+                    product_name = soup.select(self.manual_config["meta"]["product_name"])
+                    manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
-            for productTag in product_name:
-                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
-                    continue
-                filteredProductNames.append(productTag)
+            if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
+                filteredProductNames = []
+                filteredManualNames = []
+                #landesspezifische werbebroschüre kommt durch - why?
+                for manualTag in manual_name:
+                    if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
+                        continue
+                    filteredManualNames.append(manualTag)
 
-            product_name = filteredProductNames
-            manual_name = filteredManualNames
+                for productTag in product_name:
+                    if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
+                        continue
+                    filteredProductNames.append(productTag)
 
-        product_name = product_name[number % len(product_name)].text
-        manual_name = manual_name[number].text
-        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
+                product_name = filteredProductNames
+                manual_name = filteredManualNames
+
+            product_name = product_name[number % len(product_name)].text
+            manual_name = manual_name[number].text
+            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+            # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
 
 
-        if "transform" in self.manual_config["meta"].keys():
-            product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
-            manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
+            if "transform" in self.manual_config["meta"].keys():
+                product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
+                manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
 
-        meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
-        meta_data["product_name"] = utils.slugify(product_name)
-        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
-        meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        filetype = os.path.splitext(manual_link)[1]
-        if filetype == "":
-            filetype = ".pdf"
-        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
-            meta_data["filename"] = str(meta_data["manual_name"]) + filetype
-        else:
-            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
+            meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
+            meta_data["product_name"] = utils.slugify(product_name)
+            meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
+            meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
+            filetype = os.path.splitext(manual_link)[1]
+            if filetype == "":
+                filetype = ".pdf"
+            if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
+                meta_data["filename"] = str(meta_data["manual_name"]) + filetype
+            else:
+                meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
 
-        meta_data["language"] = None  # TODO
-        meta_data["URL"] = manual_link
-        meta_data["source_URL"] = source_URL
-        meta_data["index_time"] = utils.date_now()
+            meta_data["language"] = None  # TODO
+            meta_data["URL"] = manual_link
+            meta_data["source_URL"] = source_URL
+            meta_data["index_time"] = utils.date_now()
 
-        return meta_data
+            return meta_data
+        except Exception as e:
+            logging.error("could not fetch meta data from URL: " + URL + "\n" + "Product: " + product_name + " exception: " + str(e))
 
     def _save(self, manual_meta_data, content):
         """
