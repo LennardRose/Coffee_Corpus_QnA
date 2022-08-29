@@ -1,32 +1,31 @@
 {
   "manufacturer_name": "Sage",
   "base_url": "https://www.sageappliances.com/",
+  "sleepTime": 3,
+  "onlyDynamic": true,
   "paths": [
-    "eu/de/products/espresso.html#featuredRanking%20desc",
-    "eu/de/products/coffee.html#featuredRanking%20desc",
-    "eu/de/products/nespresso.html#featuredRanking%20desc"
+    "eu/de/products/espresso.html",
+    "eu/de/products/coffee.html",
+    "eu/de/products/nespresso.html"
   ],
   "layers": [
     {
       "html_tag": "a",
-      "html_class": "item item__link total_div_flex",
-      "css_selector": null,
+      "html_class": "cmp-image__image-link",
+      "css_selector": "ul.ais-Hits-list a.cmp-image__image-link",
       "filter": null
     }
   ],
   "pdf": {
     "html_tag": "a",
     "html_class": "c_tile-grid__item-link js-tile-rectangle-link",
-    "css_selector": null,
-    "filter": [
-      {
-        "condition_string": "manual",
-        "include_condition": true
-      }
-    ]
+    "css_selector": "div.cmp-container.responsivegrid a:first-child",
+    "filter": null
   },
   "meta": {
-    "manual_name": ".c_product-detail__model.col-greyMidLight > span",
-    "product_name": ".c_product-detail__heading.h1.js-product-title.font-archer-book"
+    "manual_name": ".cmp-container.responsivegrid a:first-child h3",
+    "product_name": "p.primary-product-container__model-value",
+    "transform": "\\s(.+)$"
   }
+
 }

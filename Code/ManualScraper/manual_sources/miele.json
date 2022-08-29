@@ -1,6 +1,7 @@
 {
   "manufacturer_name": "Miele",
   "base_url": "https://www.miele.de/",
+  "onlyDynamic": false,
   "sleepTime": 5,
   "paths": [
     "https://www.miele.de/haushalt/produktauswahl-kaffeevollautomaten-2513.htm"

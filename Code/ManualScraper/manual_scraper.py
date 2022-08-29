@@ -86,7 +86,7 @@ class ManualScraper:
 
                 # for each i, try the current layer to get new links, try these again with the current layer,
                 # if they stop yielding results put them to the next i do not iterate over the last i
-                for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
+                for i in tqdm(range(0, len(links) - 1), desc="Search products by layers"):
                     while links[i]:
                         old_link = links[i].pop(0)
                         new_links = self._get_layer_links(old_link, manual_config["layers"][i])
@@ -113,7 +113,7 @@ class ManualScraper:
         saves all data
         :param URLs: An iterable with all the product pages URLs
         """
-        for URL in tqdm(URLs, desc="pdfs saved"):
+        for URL in tqdm(URLs, desc="scraping "+str(len(URLs))+" products"):
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
@@ -138,7 +138,7 @@ class ManualScraper:
                         self._save(meta_data, fileBytes)
 
             except Exception as e:
-                logging.error("Something went wrong while trying to save: " + URL)
+                logging.error("No metadata found for " + URL)
                 logging.error(e)
 
     def _get_meta_data(self, URL, manual_link, number):
@@ -148,74 +148,75 @@ class ManualScraper:
             :param soup: the soup of the url
             :return: the meta_data of the urls article
         """
-        try:
-            # has to be here for the first paths, may come up with a clever solution ... or not
-            if self._is_relative_URL(URL):
-                source_URL = self.manual_config["base_url"] + URL
-            else:
-                source_URL = URL
 
-            meta_data = {}
-            soup = self._get_soup(source_URL)
+        # has to be here for the first paths, may come up with a clever solution ... or not
+        if self._is_relative_URL(URL):
+            source_URL = self.manual_config["base_url"] + URL
+        else:
+            source_URL = URL
+
+        meta_data = {}
+        soup = self._get_soup(source_URL)
+
+        if soup:
+            product_name = soup.select(self.manual_config["meta"]["product_name"])
+            manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+
+        # if static doesnt work try dynamic
+        if product_name == [] or manual_name == []:
+            soup = self._get_soup_of_dynamic_page(source_URL)
 
             if soup:
                 product_name = soup.select(self.manual_config["meta"]["product_name"])
                 manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
-            # if static doesnt work try dynamic
-            if product_name is None or manual_name == []:
-                soup = self._get_soup_of_dynamic_page(source_URL)
-                if soup:
-                    product_name = soup.select(self.manual_config["meta"]["product_name"])
-                    manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+        if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
+            filteredProductNames = []
+            filteredManualNames = []
+            for manualTag in manual_name:
+                if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
+                    continue
+                filteredManualNames.append(manualTag)
 
-            if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
-                filteredProductNames = []
-                filteredManualNames = []
-                #landesspezifische werbebroschüre kommt durch - why?
-                for manualTag in manual_name:
-                    if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
-                        continue
-                    filteredManualNames.append(manualTag)
+            for productTag in product_name:
+                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
+                    continue
+                filteredProductNames.append(productTag)
 
-                for productTag in product_name:
-                    if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
-                        continue
-                    filteredProductNames.append(productTag)
+            product_name = filteredProductNames
+            manual_name = filteredManualNames
 
-                product_name = filteredProductNames
-                manual_name = filteredManualNames
-
-            product_name = product_name[number % len(product_name)].text
-            manual_name = manual_name[number].text
-            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-            # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
+        product_name = product_name[number % len(product_name)].text
+        manual_name = manual_name[number].text
+        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
 
 
-            if "transform" in self.manual_config["meta"].keys():
-                product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
-                manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
+        if "transform" in self.manual_config["meta"].keys():
+            result = re.search(self.manual_config["meta"]["transform"], product_name.lstrip())
+            if result is not None:
+                product_name = result.group(0)
+            result = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip())
+            if result is not None:
+                manual_name = result.group(0)
 
-            meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
-            meta_data["product_name"] = utils.slugify(product_name)
-            meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
-            meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-            filetype = os.path.splitext(manual_link)[1]
-            if filetype == "":
-                filetype = ".pdf"
-            if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
-                meta_data["filename"] = str(meta_data["manual_name"]) + filetype
-            else:
-                meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
+        meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
+        meta_data["product_name"] = utils.slugify(product_name)
+        meta_data["manual_name"] = utils.slugify(manual_name)
+        meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
+        filetype = os.path.splitext(manual_link)[1]
+        if filetype == "":
+            filetype = ".pdf"
+        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
+            meta_data["filename"] = str(meta_data["manual_name"]) + filetype
+        else:
+            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
 
-            meta_data["language"] = None  # TODO
-            meta_data["URL"] = manual_link
-            meta_data["source_URL"] = source_URL
-            meta_data["index_time"] = utils.date_now()
+        meta_data["URL"] = manual_link
+        meta_data["source_URL"] = source_URL
+        meta_data["index_time"] = utils.date_now()
 
-            return meta_data
-        except Exception as e:
-            logging.error("could not fetch meta data from URL: " + URL + "\n" + "Product: " + product_name + " exception: " + str(e))
+        return meta_data
 
     def _save(self, manual_meta_data, content):
         """
@@ -257,7 +258,6 @@ class ManualScraper:
 
         links = []
 
-        # has to be here for the first paths, may come up with a clever solution ... or not
         if self._is_relative_URL(path):
             source_URL = self.manual_config["base_url"] + path
         else:
@@ -274,9 +274,6 @@ class ManualScraper:
                     link = self.manual_config["base_url"] + link[1:]
 
                 links.append(link)
-
-        #links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
-        ##TODO brauchen wir das wirklich reversed?
 
         return links
 
@@ -321,7 +318,7 @@ class ManualScraper:
         # if static doesnt work try dynamic
         onlyDynamic = False
         if "onlyDynamic" in self.manual_config.keys():
-            onlyDynamic = True
+            onlyDynamic = self.manual_config["onlyDynamic"]
         if not tag_list and not onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
@@ -351,7 +348,7 @@ class ManualScraper:
         # for example philipps needs to be dynamic soup by default as static only retrieves a few
         onlyDynamic = False
         if "onlyDynamic" in self.manual_config.keys():
-            onlyDynamic = True
+            onlyDynamic = self.manual_config["onlyDynamic"]
 
         if soup is None or onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)

@@ -1,6 +1,7 @@
 {
     "manufacturer_name": "Krups",
     "base_url": "https://www.krups.de/",
+    "onlyDynamic": false,
     "paths": [
         "bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
     ],
