@@ -2,31 +2,80 @@
     "manufacturer_name": "Krups",
     "base_url": "https://www.krups.de/",
     "paths": [
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Filterkaffeemaschinen/csc/Filter",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Kaffeevollautomaten/csc/FullAutomat",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
+        "bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
     ],
+    "sleepTime": 2,
     "layers": [
         {
             "html_tag": null,
             "html_class": null,
             "css_selector" : "div[class=c__body] a",
-            "filter": null
+            "filter": [
+                {
+                    "condition_string": "Zubeh%C3%B6r",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "abtropffach",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "cappuccinotassen",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "2-filter",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "filtereinsatz",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "entkalkungsset",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "gittereinsatz",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "tropfschale",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "kaffeekanne-deckel",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "teefilter",
+                    "include_condition": false
+                }
+            ]
         }
     ],
     "pdf":
         {
             "html_tag": null,
             "html_class": null,
-            "css_selector": "#ifu-list > sd-component-wrapper > div > div.c__component-wrapper-component.is-small-width.ng-star-inserted > sd-documents > ul > li:nth-child(1) > sd-document > sd-link > a",
-            "filter" : null
+            "css_selector": "a.c__link",
+            "filter" : [
+                {
+                    "condition_string": "Safety",
+                    "include_condition": false
+                },
+                {
+                    "condition_string": "garantie",
+                    "include_condition": false
+                }
+            ]
         },
-		
+
     "meta" :
         {
-            "manual_name" : "#overview > sd-product-overview > div > div.c__content.col-24.col-l-9.col-m-12.offset-l-1 > div.c__title-wrapper.ng-star-inserted > div.c__ref-wrapper > p",
-            "product_name" : "#overview > sd-product-overview > div > div.c__content.col-24.col-l-9.col-m-12.offset-l-1 > div.c__title-wrapper.ng-star-inserted > div.c__ref-wrapper > p"
+            "manual_name" : "p.c__ref.is-caption.ng-star-inserted",
+            "product_name" : "p.c__ref.is-caption.ng-star-inserted",
+            "transform": "([\\S]+).$"
         }
 
 }

@@ -2,7 +2,7 @@
   "manufacturer_name": "Melitta",
   "base_url": "https://www.melitta.de/",
   "paths": [
-    "beratung/service-tipps/bedienungsanleitungen/"
+    "kaffeevollautomaten/service/bedienungsanleitungen/"
   ],
   "layers": [ ],
   "pdf": {
@@ -37,11 +37,54 @@
       {
         "condition_string": "MyCup",
         "include_condition": false
+      },
+      {
+        "condition_string": "Connect-App",
+        "include_condition": false
       }
     ]
   },
   "meta": {
     "manual_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
-    "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])"
+    "product_name": "p[class^=digital-publishing-fluid-text-35] > a:not([rel])",
+    "transform": "[^(]*",
+    "filter": [
+      {
+        "condition_string": "adobe",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Aqua",
+        "include_condition": false
+      },
+      {
+        "condition_string": "AQUA",
+        "include_condition": false
+      },
+      {
+        "condition_string": "CREMIO",
+        "include_condition": false
+      },
+      {
+        "condition_string": "MOLINO",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Calibra",
+        "include_condition": false
+      },
+      {
+        "condition_string": "CALIBRA",
+        "include_condition": false
+      },
+      {
+        "condition_string": "MyCup",
+        "include_condition": false
+      },
+      {
+        "condition_string": "Connect App",
+        "include_condition": false
+      }
+    ]
   }
 }

@@ -19,6 +19,7 @@ import logging
 import ssl
 import os
 from tqdm import tqdm
+import time
 
 
 class ManualScraper:
@@ -60,7 +61,6 @@ class ManualScraper:
                           "current path: " + path)
             logging.error(e)
 
-
     def scrape(self, manual_config):
         """
         makes sure necessary properties are set in the manual_config
@@ -86,22 +86,22 @@ class ManualScraper:
                 for i in tqdm(range(0, len(links) - 1), desc="query linktree for pdfs"):
                     while links[i]:
                         old_link = links[i].pop(0)
-                        new_links = []
-                        new_links.extend(self._get_layer_links(old_link, manual_config["layers"][i]))
+                        new_links = self._get_layer_links(old_link, manual_config["layers"][i])
                         # if the old link yielded new results append them and remove the old link (popped above)
                         if new_links:
-                            links[i].extend(new_links)
+                            links[i].extend(set(new_links))
                         # if the link does not yielded results, try in the next iteration with the next layer
                         else:
                             # to the next layer, ultimatively the last one gets filled only with "product pages" or
                             # the destination link on which the manuals are
                             links[i + 1].append(old_link)
-
+            # final duplicate filtering:
+            links[-1] = list(set(links[-1]))
+            # TODO links direkt als set machen? spart zusätzliches scrapen
             self._save_manuals(links[-1])
 
         # clear manual config for next one
         self.reset_scraper()
-
 
     def _save_manuals(self, URLs):
         """
@@ -114,24 +114,29 @@ class ManualScraper:
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
+
                 for i, manual_link in enumerate(manual_links):
-                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(self.manual_config["base_url"],
-                                                                                                           self.manual_config[
-                                                                                                               "manufacturer_name"])
+                    most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
+                        self.manual_config["base_url"],
+                        self.manual_config[
+                            "manufacturer_name"])
 
                     if not self._was_already_saved(most_recent_saved_articles_url, URL):
+                        try:
+                            meta_data = self._get_meta_data(URL, manual_link, i)
+                        except IndexError:
+                            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+                            # -> index access returns Index error as flag for skipping
+                            # next manual link
+                            continue
+                        fileBytes = self._get_pdf_bytes(manual_link)
                         # save element
                         logging.info("Save content of: " + manual_link)
-
-                        meta_data = self._get_meta_data(URL, manual_link, i)
-                        fileBytes = self._get_pdf_bytes(manual_link)
-
                         self._save(meta_data, fileBytes)
 
             except Exception as e:
                 logging.error("Something went wrong while trying to save: " + URL)
                 logging.error(e)
-
 
     def _get_meta_data(self, URL, manual_link, number):
         """ TODO
@@ -150,29 +155,62 @@ class ManualScraper:
         meta_data = {}
         soup = self._get_soup(source_URL)
 
-        product_name = soup.select(self.manual_config["meta"]["product_name"])#
-        manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+        if soup:
+            product_name = soup.select(self.manual_config["meta"]["product_name"])
+            manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+
+        # if static doesnt work try dynamic
         if product_name is None or manual_name == []:
             soup = self._get_soup_of_dynamic_page(source_URL)
-            product_name = soup.select(self.manual_config["meta"]["product_name"])#[0].text
-            manual_name = soup.select(self.manual_config["meta"]["manual_name"])#[number].text
-        product_name = product_name[0].text
+            if soup:
+                product_name = soup.select(self.manual_config["meta"]["product_name"])
+                manual_name = soup.select(self.manual_config["meta"]["manual_name"])
+
+        if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
+            filteredProductNames = []
+            filteredManualNames = []
+            #landesspezifische werbebroschüre kommt durch - why?
+            for manualTag in manual_name:
+                if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
+                    continue
+                filteredManualNames.append(manualTag)
+
+            for productTag in product_name:
+                if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
+                    continue
+                filteredProductNames.append(productTag)
+
+            product_name = filteredProductNames
+            manual_name = filteredManualNames
+
+        product_name = product_name[number % len(product_name)].text
         manual_name = manual_name[number].text
+        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
+        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
+
+
+        if "transform" in self.manual_config["meta"].keys():
+            product_name = re.search(self.manual_config["meta"]["transform"], product_name.lstrip()).group(0)
+            manual_name = re.search(self.manual_config["meta"]["transform"], manual_name.lstrip()).group(0)
 
         meta_data["manufacturer_name"] = self.manual_config["manufacturer_name"]
         meta_data["product_name"] = utils.slugify(product_name)
-        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht #TODO hier nach "intro" name filtern
+        meta_data["manual_name"] = utils.slugify(manual_name)  # TODO gucken obs hier bricht
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + ".pdf")
+        filetype = os.path.splitext(manual_link)[1]
+        if filetype == "":
+            filetype = ".pdf"
+        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
+            meta_data["filename"] = str(meta_data["manual_name"]) + filetype
+        else:
+            meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
+
         meta_data["language"] = None  # TODO
         meta_data["URL"] = manual_link
         meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
 
-        print(meta_data)
-
         return meta_data
-
 
     def _save(self, manual_meta_data, content):
         """
@@ -203,7 +241,6 @@ class ManualScraper:
                 logging.error(e)
                 client_factory.get_meta_client().delete_meta_data(current_id)
 
-
     def _get_layer_links(self, path, layer):
         """
         creates a list with the links on the path with respect to the constraints of the given layer
@@ -233,10 +270,10 @@ class ManualScraper:
 
                 links.append(link)
 
-        links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        #links.reverse()  # important to have the newest link at the last index of the list, so it has the newest indexing time, making it easier (if not possible) to search for without having to write an overcomplicated algorithm
+        ##TODO brauchen wir das wirklich reversed?
 
         return links
-
 
     def _get_link_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
@@ -259,7 +296,6 @@ class ManualScraper:
 
         return link_list
 
-
     def _get_tag_list(self, URL, html_tag=None, html_class=None, css_selector=None):
         """
         collects all tags that match html_tag and html_class or css_selector
@@ -278,7 +314,10 @@ class ManualScraper:
                 tag_list = soup.body.find_all(html_tag, html_class)
 
         # if static doesnt work try dynamic
-        if not tag_list:
+        onlyDynamic = False
+        if "onlyDynamic" in self.manual_config.keys():
+            onlyDynamic = True
+        if not tag_list and not onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
             if soup:
                 if css_selector:
@@ -294,10 +333,8 @@ class ManualScraper:
 
         return tag_list
 
-
     def _get_pdf_bytes(self, URL):
         return requests.get(URL).content
-
 
     def _get_soup(self, URL):
         """
@@ -306,14 +343,18 @@ class ManualScraper:
         """
         soup = self._get_soup_of_static_page(URL)
 
-        if soup is None:
+        # for example philipps needs to be dynamic soup by default as static only retrieves a few
+        onlyDynamic = False
+        if "onlyDynamic" in self.manual_config.keys():
+            onlyDynamic = True
+
+        if soup is None or onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)
 
             if soup is None:
                 logging.error("No soup could be cooked for" + URL + " !")
 
         return soup
-
 
     def _get_soup_of_static_page(self, URL):
         """
@@ -337,7 +378,6 @@ class ManualScraper:
         else:
             return None
 
-
     def _get_soup_of_dynamic_page(self, URL):
         """
         extract content of dynamic loaded page
@@ -351,18 +391,18 @@ class ManualScraper:
             try:
                 retry_count += 1
                 self.driver.get(URL)
-                # time.sleep(1)  # load page
+                if "sleepTime" in self.manual_config.keys():
+                    time.sleep(self.manual_config["sleepTime"])  # load page
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 int(utils.config["MAX_TRY"]) - retry_count)
                 logging.warning(e)
-        #self.driver.close()
+        # self.driver.close()
         if page:
             return BeautifulSoup(page, 'html5lib')
         else:
             return None
-
 
     def _search_direct_children_for_href(self, tag):
         """
@@ -373,7 +413,6 @@ class ManualScraper:
                 return child['href']
         else:
             return None
-
 
     def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
         """
@@ -387,7 +426,6 @@ class ManualScraper:
         else:
             return False
 
-
     def _is_relative_URL(self, URL):
         """
         checks if the given URL starts with http, to determine if it is a relative URL
@@ -396,7 +434,6 @@ class ManualScraper:
         :return: false if URL starts with http, otherwise true
         """
         return not bool(re.search("^http", URL))
-
 
     def _is_valid(self, URL, conditions):
         """
