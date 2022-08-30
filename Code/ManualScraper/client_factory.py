@@ -11,7 +11,6 @@
 from hdfs_client import HDFSClient, MOCKHDFSClient
 from abstract_client import *
 from elastic_search_client import ElasticSearchClient, MockElasticSearchClient
-import utils
 import config
 
 _file_client = None

@@ -14,15 +14,13 @@ from argument_parser_wrapper import ArgumentParserWrapper
 from manual_scraper import ManualScraper
 import logging
 import utils
+import config
 
 if __name__ == '__main__':
 
-    config_path = os.path.join("..", "config", "config.json")
-
-    utils.init_global_config(config_path)
-    logging.basicConfig(filename=utils.config["STANDARD_LOG_FILENAME"],
-                        format=utils.config["STANDARD_LOG_FORMAT"],
-                        datefmt=utils.config["STANDARD_LOG_DATE_FORMAT"],
+    logging.basicConfig(filename=config.STANDARD_LOG_FILENAME,
+                        format=config.STANDARD_LOG_FORMAT,
+                        datefmt=config.STANDARD_LOG_DATE_FORMAT,
                         level=logging.DEBUG)
 
     logging.info("Start ManualScraper")
@@ -30,7 +28,7 @@ if __name__ == '__main__':
     scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
-    with open("./manual_sources/krups.json", "r", encoding='utf-8') as file:
+    with open("./manual_sources/braun.json", "r", encoding='utf-8') as file:
         source = json.load(file)
         scraper.scrape(source)
 
