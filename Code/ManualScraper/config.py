@@ -1,10 +1,6 @@
-"""ELASTICSEARCH_URL = "localhost",
-ELASTICSEARCH_PORT = "9200",
-HDFS_URL = "192.168.0.115",
-HDFS_PORT = "9870",
-HDFS_USER = "hadoop",
-RECENT_MANUAL_COUNT = "100",
-MAX_TRY = "3",
+# -------------------------------COMMON------------------------------------------
+RECENT_MANUAL_COUNT = 100,
+MAX_TRY = 3,
 STANDARD_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ",
 STANDARD_DATE_FORMAT = "%Y-%m-%d",
 STANDARD_LOG_FORMAT = "[%(levelname)s][%(asctime)s]: %(message)s",
@@ -17,4 +13,13 @@ CLIENTS = {
     "MANUAL_CLIENT": "elastic",
     "FILE_CLIENT": "mock_hdfs"
 }
-"""
+# -------------------------------HDFS---------------------------------------------------
+HDFS_URL = "192.168.0.115",
+HDFS_PORT = "9870",
+HDFS_USER = "hadoop",
+# -------------------------------ElasticSearch------------------------------------------
+ES_URL = '127.0.0.1'
+ES_PORT = '9200'
+
+
+

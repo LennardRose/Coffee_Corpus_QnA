@@ -8,21 +8,19 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from typing import List
-
 import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 import re
-import html5lib
 import client_factory
 import logging
 import ssl
 import os
 from tqdm import tqdm
 import time
+import config
 
 
 class ManualScraper:
@@ -52,10 +50,10 @@ class ManualScraper:
             driver_options.headless = True
 
             if os.name == 'posix':
-                path = os.path.join(utils.config["WEBDRIVER_DIR"], "linux", utils.config["WEBDRIVER_FILE"])
+                path = os.path.join(config.WEBDRIVER_DIR, "linux", config.WEBDRIVER_FILE)
                 return webdriver.Chrome(path, options=driver_options)
             else:
-                path = os.path.join(utils.config["WEBDRIVER_DIR"], "windows", utils.config["WEBDRIVER_FILE"])
+                path = os.path.join(config.WEBDRIVER_DIR, "windows", config.WEBDRIVER_FILE)
                 return webdriver.Chrome(executable_path=path, options=driver_options)
 
         except Exception as e:
@@ -368,13 +366,13 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page == None and retry_count < int(utils.config["MAX_TRY"]):
+        while page == None and retry_count < config.MAX_TRY:
             try:
                 retry_count += 1
                 page = requests.get(URL, timeout=5)
             except Exception as e:
                 logging.warning("request unable to get: %s - retries left: %d", URL,
-                                int(utils.config["MAX_TRY"]) - retry_count)
+                                config.MAX_TRY - retry_count)
                 logging.warning(e)
         if page:
             return BeautifulSoup(page.content, 'html5lib')
@@ -390,7 +388,7 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page is None and retry_count < int(utils.config["MAX_TRY"]):
+        while page is None and retry_count < config.MAX_TRY:
             try:
                 retry_count += 1
                 self.driver.get(URL)
@@ -399,9 +397,9 @@ class ManualScraper:
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
-                                int(utils.config["MAX_TRY"]) - retry_count)
+                                config.MAX_TRY - retry_count)
                 logging.warning(e)
-        # self.driver.close()
+
         if page:
             return BeautifulSoup(page, 'html5lib')
         else:
