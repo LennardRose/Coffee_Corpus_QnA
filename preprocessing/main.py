@@ -39,6 +39,6 @@ if __name__ == '__main__':
     
     # instantiate preprocessor
     pp = Preprocessor(output_dir='output_preprocessing')
-    output = pp.process('example_pdfs/single_test')  
+    output = pp.process('example_pdfs/single_test_toc')  
     
     # output.to_csv("output/main_out.csv")
