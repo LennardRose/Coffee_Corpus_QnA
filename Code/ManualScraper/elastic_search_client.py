@@ -125,7 +125,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                     {"bool":
                         {"must": [
                             {"match_phrase": {"manufacturer_name": {"query": manufacturer_name}}},
-                            {"match_phrase": {"source_url": {"query": source_URL}}}
+                            {"match_phrase": {"source_URL": {"query": source_URL}}}
                         ]}
                     },
                 "sort": [{"index_time": {"order": "desc"}}],

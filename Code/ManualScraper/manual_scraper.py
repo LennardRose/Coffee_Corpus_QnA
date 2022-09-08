@@ -112,7 +112,7 @@ class ManualScraper:
         :param URLs: An iterable with all the product pages URLs
         """
 
-        for URL in tqdm(URLs, desc="scraping "+str(len(URLs))+" products"):
+        for URL in tqdm(URLs, desc="scraping " + str(len(URLs)) + " products"):
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
@@ -123,16 +123,14 @@ class ManualScraper:
                         self.manual_config[
                             "manufacturer_name"])
 
-                    if not self._was_already_saved(most_recent_saved_articles_url, URL):
-                        try:
-                            meta_data = self._get_meta_data(URL, manual_link, i)
-                        except IndexError:
-                            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-                            # -> index access returns Index error as flag for skipping
-                            # next manual link
+                    if not self._was_already_saved(most_recent_saved_articles_url, manual_link):
+
+                        meta_data = self._get_meta_data(URL, manual_link, i)
+                        if meta_data is None:
                             continue
+
                         fileBytes = self._get_pdf_bytes(manual_link)
-                        # save element
+
                         logging.info("Save content of: " + manual_link)
                         self._save(meta_data, fileBytes)
 
@@ -186,10 +184,13 @@ class ManualScraper:
             manual_name = filteredManualNames
 
         product_name = product_name[number % len(product_name)].text
-        manual_name = manual_name[number].text
-        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
-
+        try:
+            manual_name = manual_name[number].text
+        except IndexError:
+            return None
+        # If index higher than amount of manuals after filtering this manual got filtered by the manual name ("eu conformity pdf" for example) and thus should be skipped
+        # -> index access returns Index error as flag for skipping
+        # return None so upper logic knows to continue to next manual link
 
         if "transform" in self.manual_config["meta"].keys():
             result = re.search(self.manual_config["meta"]["transform"], product_name.lstrip())
@@ -206,7 +207,8 @@ class ManualScraper:
         filetype = os.path.splitext(manual_link)[1]
         if filetype == "":
             filetype = ".pdf"
-        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
+        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(
+                meta_data["product_name"]):
             meta_data["filename"] = str(meta_data["manual_name"]) + filetype
         else:
             meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)

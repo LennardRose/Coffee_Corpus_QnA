@@ -17,24 +17,25 @@ from manual_scraper import ManualScraper
 import logging
 import utils
 import sys
+import config
 
 if __name__ == '__main__':
 
-    config_path = os.path.join("..", "config", "config.json")
-
-    utils.init_global_config(config_path)
-    logging.basicConfig(filename=utils.config["STANDARD_LOG_FILENAME"],
-                        format=utils.config["STANDARD_LOG_FORMAT"],
-                        datefmt=utils.config["STANDARD_LOG_DATE_FORMAT"],
+    logging.basicConfig(filename=config.STANDARD_LOG_FILENAME,
+                        format=config.STANDARD_LOG_FORMAT,
+                        datefmt=config.STANDARD_LOG_DATE_FORMAT,
                         level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+    streamHandler = logging.StreamHandler(sys.stdout)
+    streamHandler.setLevel(logging.INFO)
+    #logging.getLogger().addHandler(streamHandler)
+    # TODO needs more fine tuning
 
     logging.info("Start ManualScraper")
 
     scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
-    for source in tqdm(parser.parse_data_from_arguments(), desc="scrape source(s)"):
+    for source in tqdm(parser.parse_data_from_arguments(), desc="scrape sources"):
         scraper.scrape(source)
 
     logging.info("Close ManualScraper")

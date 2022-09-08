@@ -2,7 +2,7 @@
 MAX_TRY = 3
 # dont change this config without checking if it is a elasticsearch readable date-format (if you use elasticsearch)
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time
-STANDARD_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"#.%fZ"
+STANDARD_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 STANDARD_DATE_FORMAT = "%Y-%m-%d"
 STANDARD_LOG_FORMAT = "[%(levelname)s][%(asctime)s]: %(message)s"
 STANDARD_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -61,7 +61,7 @@ metaMapping = {
                     },
                     "index_time": {
                         "type": "date",
-                        "format": "yyyy-MM-dd'T'HH:mm:ss"
+                        "format": "yyyy-MM-dd'T'HH:mm:ssZ"
                     },
                     "language": {
                         "type": "text",

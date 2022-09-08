@@ -15,6 +15,7 @@ import re
 import logging
 import json
 import config
+import pytz
 
 
 def parse_date(index_date):
@@ -34,7 +35,7 @@ def date_now():
     """
     returns current datetime in the STANDARD_DATETIME_FORMAT
     """
-    return parse_date(datetime.now())
+    return parse_date(datetime.now(pytz.timezone("Europe/Berlin")))
 
 
 def date_today():
@@ -44,7 +45,7 @@ def date_today():
     return date.today().strftime(config.STANDARD_DATE_FORMAT)
 
 
-def slugify(value, allow_unicode=False):
+def slugify(value, allow_unicode=True):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
