@@ -123,16 +123,18 @@ class ManualScraper:
                         self.manual_config[
                             "manufacturer_name"])
 
-                    if not self._was_already_saved(most_recent_saved_articles_url, manual_link):
+                    if not self._check_was_already_saved_by_url(most_recent_saved_articles_url, manual_link):
 
                         meta_data = self._get_meta_data(URL, manual_link, i)
                         if meta_data is None:
                             continue
 
-                        fileBytes = self._get_pdf_bytes(manual_link)
+                        if not self._check_was_already_saved_by_meta(meta_data):
 
-                        logging.info("Save content of: " + manual_link)
-                        self._save(meta_data, fileBytes)
+                            fileBytes = self._get_pdf_bytes(manual_link)
+
+                            logging.info("Save content of: " + manual_link)
+                            self._save(meta_data, fileBytes)
 
             except Exception as e:
                 logging.error("No metadata found for " + URL)
@@ -289,7 +291,7 @@ class ManualScraper:
         for link in self._get_tag_list(URL, html_tag, html_class, css_selector):
 
             if link.has_attr('href'):
-                link_list.append(link['href'])
+                link_list.append(utils.clean_url(link['href']))
 
             else:
                 link = self._search_direct_children_for_href(link)
@@ -417,7 +419,7 @@ class ManualScraper:
         else:
             return None
 
-    def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
+    def _check_was_already_saved_by_url(self, most_recent_saved_articles_URLs, current_URL):
         """
         the first link in the list returned by the page is not always the most recent
         :param most_recent_saved_articles_url: the URLs of the most recent saved articles (in an earlier call)
@@ -467,3 +469,12 @@ class ManualScraper:
                         valid = valid
 
         return valid
+
+    def _check_was_already_saved_by_meta(self, meta_data):
+
+        doc_count = client_factory.get_meta_client().count_entries_by_product_and_manual(meta_data["manufacturer_name"], meta_data["product_name"], meta_data["manual_name"])
+        if doc_count is None:
+            return False
+        return doc_count > 0
+
+

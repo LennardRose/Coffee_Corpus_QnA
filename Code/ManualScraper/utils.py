@@ -16,6 +16,7 @@ import logging
 import json
 import config
 import pytz
+from urllib.parse import urljoin, urlparse
 
 
 def parse_date(index_date):
@@ -44,6 +45,8 @@ def date_today():
     """
     return date.today().strftime(config.STANDARD_DATE_FORMAT)
 
+def clean_url(url):
+    return urljoin(url, urlparse(url).path)
 
 def slugify(value, allow_unicode=True):
     """

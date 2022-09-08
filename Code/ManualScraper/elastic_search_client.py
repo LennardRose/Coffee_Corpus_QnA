@@ -106,8 +106,6 @@ class ElasticSearchClient(MetaClient, ManualClient):
         if not result["result"] == "created":
             raise Exception("config could not be indexed")
 
-
-
     def get_latest_entry_URL(self, source_URL, manufacturer_name):
         """
         searches for the latest entries url of the given website, number of returned entries defined in config
@@ -139,6 +137,33 @@ class ElasticSearchClient(MetaClient, ManualClient):
             return result
         except:
             return None
+
+    def count_entries_by_product_and_manual(self, manufacturer, product_name, manual_name):
+        """
+        searches for entries by given manufacturer, product_name and manual_name to check if given manual already exists
+        :param manufacturer: the name of the manufacturer
+        :param product_name: the name of the product
+        :param manual_name: the name of the manual
+        :returns: the count of entries given the arguments
+        """
+        try:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"match": {"manufacturer_name": manufacturer}},
+                            {"match": {"product_name": product_name}},
+                            {"match": {"manual_name": manual_name}}
+                        ]
+                    }
+                }
+            }
+            response = self.es_client.count(index=config.metaIndex, body=query)
+
+            return response["count"]
+        except:
+            return None
+
 
 class MockElasticSearchClient(MetaClient, ManualClient):
 
