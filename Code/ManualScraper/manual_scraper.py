@@ -111,7 +111,6 @@ class ManualScraper:
         saves all data
         :param URLs: An iterable with all the product pages URLs
         """
-
         for URL in tqdm(URLs, desc="scraping " + str(len(URLs)) + " products"):
             try:
                 # all the different manuals
@@ -135,7 +134,6 @@ class ManualScraper:
 
                             logging.info("Save content of: " + manual_link)
                             self._save(meta_data, fileBytes)
-
             except Exception as e:
                 logging.error("No metadata found for " + URL)
                 logging.error(e)
