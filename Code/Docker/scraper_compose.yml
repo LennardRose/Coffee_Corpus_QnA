@@ -20,6 +20,8 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    restart: always
+
 
   kibana:
     container_name: kibana
@@ -30,6 +32,7 @@ services:
       - 5601:5601
     depends_on:
       - elasticsearch
+    restart: always
 
 
 volumes:

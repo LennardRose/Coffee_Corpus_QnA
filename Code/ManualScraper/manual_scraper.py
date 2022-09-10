@@ -117,6 +117,7 @@ class ManualScraper:
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
 
                 for i, manual_link in enumerate(manual_links):
+
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
                         self.manual_config["base_url"],
                         self.manual_config[
@@ -129,7 +130,6 @@ class ManualScraper:
                             continue
 
                         if not self._check_was_already_saved_by_meta(meta_data):
-
                             fileBytes = self._get_pdf_bytes(manual_link)
 
                             logging.info("Save content of: " + manual_link)
@@ -204,7 +204,7 @@ class ManualScraper:
         meta_data["product_name"] = utils.slugify(product_name)
         meta_data["manual_name"] = utils.slugify(manual_name)
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        filetype = os.path.splitext(manual_link)[1]
+        filetype = os.path.splitext(utils.clean_url(manual_link))[1]
         if filetype == "":
             filetype = ".pdf"
         if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(
@@ -274,7 +274,9 @@ class ManualScraper:
                 if self._is_relative_URL(link):
                     link = self.manual_config["base_url"] + link[1:]
 
-                links.append(link)
+                # bugfix for miele as it goes into infinity loop
+                if link != source_URL:
+                    links.append(link)
 
         return links
 
@@ -289,7 +291,7 @@ class ManualScraper:
         for link in self._get_tag_list(URL, html_tag, html_class, css_selector):
 
             if link.has_attr('href'):
-                link_list.append(utils.clean_url(link['href']))
+                link_list.append(link['href'])
 
             else:
                 link = self._search_direct_children_for_href(link)
@@ -368,7 +370,7 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page == None and retry_count < config.MAX_TRY:
+        while page is None and retry_count < config.MAX_TRY:
             try:
                 retry_count += 1
                 page = requests.get(URL, timeout=5)
@@ -470,9 +472,9 @@ class ManualScraper:
 
     def _check_was_already_saved_by_meta(self, meta_data):
 
-        doc_count = client_factory.get_meta_client().count_entries_by_product_and_manual(meta_data["manufacturer_name"], meta_data["product_name"], meta_data["manual_name"])
+        doc_count = client_factory.get_meta_client().count_entries_by_product_and_manual(meta_data["manufacturer_name"],
+                                                                                         meta_data["product_name"],
+                                                                                         meta_data["manual_name"])
         if doc_count is None:
             return False
         return doc_count > 0
-
-
