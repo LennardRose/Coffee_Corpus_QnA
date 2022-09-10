@@ -14,7 +14,12 @@
             "html_tag": "div",
             "html_class": "dln-categoryBox",
             "css_selector" : ".dln-category-browser__category > div > a",
-            "filter": null
+            "filter": [
+                {
+                    "condition_string": "//p/",
+                    "include_condition": false
+                }
+            ]
         }
     ],
     "pdf":
