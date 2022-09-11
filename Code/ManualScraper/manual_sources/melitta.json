@@ -2,6 +2,7 @@
   "manufacturer_name": "Melitta",
   "base_url": "https://www.melitta.de/",
   "onlyDynamic": false,
+  "sleepTime" : 2,
   "paths": [
     "kaffeevollautomaten/service/bedienungsanleitungen/"
   ],
