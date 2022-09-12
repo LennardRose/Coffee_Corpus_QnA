@@ -204,8 +204,10 @@ class ManualScraper:
         meta_data["product_name"] = utils.slugify(product_name)
         meta_data["manual_name"] = utils.slugify(manual_name)
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        filetype = os.path.splitext(utils.clean_url(manual_link))[1]
-        if filetype == "":
+        # clean url necessary for jura, example: 'https://www.jura.com/-/media/global/pdf/manuals-global/home/ENA/ENA
+        # -4/download_manual_ena4.pdf?la=de&hash=7DA7BC6A1C4BD6C6CA040FBF955CA5F2C37FC8CA&em_force=true'
+        filetype = utils.clean_url(os.path.splitext(manual_link)[1])
+        if filetype == "" or filetype is None:
             filetype = ".pdf"
         if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(
                 meta_data["product_name"]):
