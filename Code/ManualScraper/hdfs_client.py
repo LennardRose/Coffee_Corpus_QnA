@@ -14,7 +14,7 @@ from pywebhdfs.webhdfs import PyWebHdfsClient
 from abstract_client import FileClient
 import json
 import logging
-
+import config
 
 class HDFSClient(FileClient):
     """
@@ -26,9 +26,9 @@ class HDFSClient(FileClient):
         """
         init function that creates an insecure hdfs client
         """
-        logging.info("Init HDFS client with url: %s : %s", utils.config["HDFS_URL"], utils.config["HDFS_PORT"])
-        self.hdfs_client = PyWebHdfsClient(host=utils.config["HDFS_URL"], port=utils.config["HDFS_PORT"],
-                                           user_name=utils.config["HDFS_USER"], timeout=1)
+        logging.info("Init HDFS client with url: %s : %s", config.HDFS_URL, config.HDFS_PORT)
+        self.hdfs_client = PyWebHdfsClient(host=config.HDFS_URL, port=config.HDFS_PORT,
+                                           user_name=config.HDFS_USER, timeout=1)
 
 
     def read_file(self, file_path):

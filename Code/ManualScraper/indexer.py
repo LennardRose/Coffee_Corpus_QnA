@@ -81,7 +81,7 @@ for file in enumerate(all_files):
             }
     }
 
-    already_indexed_document = client.search(index="manual_config", body = query)
+    already_indexed_document = client.search(index="manuals_config", body=query)
 
     if already_indexed_document["hits"]["total"]["value"] == 0:
         response = client.index(index="manual_config", body=data, doc_type="_doc")

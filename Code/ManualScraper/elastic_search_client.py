@@ -12,6 +12,7 @@ from abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
 import utils
+import config
 
 
 class ElasticSearchClient(MetaClient, ManualClient):
@@ -20,39 +21,36 @@ class ElasticSearchClient(MetaClient, ManualClient):
     offers all functionality concerning communication with the elasticsearch server
     """
 
-
     def __init__(self):
         """
         constructor which crates ElasticSearchClient with the elasticsearch
         url from the config file
         """
 
-        logging.info("Init Elasticsearch client with url: %s : %s", utils.config["ELASTICSEARCH_URL"],
-                     utils.config["ELASTICSEARCH_PORT"])
-        self.es_client = Elasticsearch([utils.config["ELASTICSEARCH_URL"] + ":" + utils.config["ELASTICSEARCH_PORT"]])
+        logging.info("Init Elasticsearch client with url: %s : %s", config.ES_URL,
+                     config.ES_PORT)
+        self.es_client = Elasticsearch([config.ES_URL + ":" + config.ES_PORT])
 
         self._initialize_indizes_if_not_there()
-
 
     def _initialize_indizes_if_not_there(self):
         """
         initializes needed indizes if not already there
         """
-        if not self.es_client.indices.exists(index="manual_config"):
-            logging.info("Index manual_config not found, initialize index.")
-            self.es_client.indices.create(index="manual_config")
+        if not self.es_client.indices.exists(index=config.sourceIndex):
+            logging.info("Index " + config.sourceIndex + " not found, initialize index.")
+            self.es_client.indices.create(index=config.sourceIndex)  # , body=config.sourceMapping, ignore=400)
+            # ignore 400 cause by IndexAlreadyExistsException when creating an index
 
-        if not self.es_client.indices.exists(index="manual_meta_data"):
-            logging.info("Index manual_meta_data not found, initialize index.")
-            self.es_client.indices.create(index="manual_meta_data", body=self._get_manual_meta_data_mapping())
-
+        if not self.es_client.indices.exists(index=config.metaIndex):
+            logging.info("Index " + config.metaIndex + " not found, initialize index.")
+            self.es_client.indices.create(index=config.metaIndex, body=config.metaMapping, ignore=400)
 
     def delete_meta_data(self, id):
         """
         deletes meta_data doc in manual_meta_data index
         """
         self.es_client.delete(index="manual_meta_data", id=id)
-
 
     def get_manual_config(self, id):
         """
@@ -62,12 +60,11 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
 
         query = {"query": {"match": {"_id": {"query": id}}}}
-        docs = self.es_client.search(index="manual_config", body=query)
+        docs = self.es_client.search(index=config.sourceIndex, body=query)
         if docs["hits"]["hits"]:
             return docs["hits"]["hits"][0]["_source"]
         else:
             logging.error("id: " + id + " not found.")
-
 
     def get_all_manual_configs(self):
         """
@@ -76,12 +73,11 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
 
         query = {"size": 1000, "query": {"match_all": {}}}
-        docs = self.es_client.search(index="manual_config", body=query)
+        docs = self.es_client.search(index=config.sourceIndex, body=query)
         result = []
         for doc in docs["hits"]["hits"]:
             result.append(doc["_source"])
         return result
-
 
     def index_meta_data(self, metadata_json):
         """
@@ -89,7 +85,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
         :return: the id of the new indexed meta data
         """
 
-        result = self.es_client.index(index="manual_meta_data", body=metadata_json,
+        result = self.es_client.index(index=config.metaIndex, body=metadata_json,
                                       doc_type="_doc")
 
         if result["result"] == "created" and result["_id"]:
@@ -98,6 +94,17 @@ class ElasticSearchClient(MetaClient, ManualClient):
         else:
             raise Exception("meta_data not created")
 
+    def index_config(self, id, doc):
+        """
+        does index a single doc of metadata for restriction/measures
+
+        Args:
+            id (string): id of the document
+            doc (object/dict): document to insert
+        """
+        result = self.es_client.index(index=config.sourceIndex, id=id, body=doc)
+        if not result["result"] == "created":
+            raise Exception("config could not be indexed")
 
     def get_latest_entry_URL(self, source_URL, manufacturer_name):
         """
@@ -116,13 +123,12 @@ class ElasticSearchClient(MetaClient, ManualClient):
                     {"bool":
                         {"must": [
                             {"match_phrase": {"manufacturer_name": {"query": manufacturer_name}}},
-                            {"match_phrase": {"source_url": {"query": source_URL}}}
+                            {"match_phrase": {"source_URL": {"query": source_URL}}}
                         ]}
                     },
                 "sort": [{"index_time": {"order": "desc"}}],
-                "size": utils.config["RECENT_MANUAL_COUNT"]
             }
-            docs = self.es_client.search(index="manual_meta_data", body=query)
+            docs = self.es_client.search(index=config.metaIndex, body=query)
 
             for doc in docs["hits"]["hits"]:
                 result.append(doc["_source"]["URL"])
@@ -131,92 +137,31 @@ class ElasticSearchClient(MetaClient, ManualClient):
         except:
             return None
 
-
-    def _get_manual_meta_data_mapping(self):
+    def count_entries_by_product_and_manual(self, manufacturer, product_name, manual_name):
         """
-        :return: the manual_meta_data index mapping
+        searches for entries by given manufacturer, product_name and manual_name to check if given manual already exists
+        :param manufacturer: the name of the manufacturer
+        :param product_name: the name of the product
+        :param manual_name: the name of the manual
+        :returns: the count of entries given the arguments
         """
-        return {
-            "mappings": {
-                "properties": {
-                    "URL": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "filename": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "filepath": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "index_time": {
-                        "type": "date"
-                    },
-                    "language": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manual_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manufacturer_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "product_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "source_URL": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
+        try:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"match": {"manufacturer_name": manufacturer}},
+                            {"match": {"product_name": product_name}},
+                            {"match": {"manual_name": manual_name}}
+                        ]
                     }
                 }
             }
-        }
+            response = self.es_client.count(index=config.metaIndex, body=query)
+
+            return response["count"]
+        except:
+            return None
 
 
 class MockElasticSearchClient(MetaClient, ManualClient):
@@ -224,22 +169,17 @@ class MockElasticSearchClient(MetaClient, ManualClient):
     def index_meta_data(self, metadata_json):
         return True
 
-
     def get_latest_entry_URL(self, source_URL, region):
         return False
-
 
     def delete_meta_data(self, id):
         return True
 
-
     def get_manual_config(self, id):
         return True
 
-
     def get_all_manual_configs(self):
         return True
-
 
     def __init__(self):
         pass

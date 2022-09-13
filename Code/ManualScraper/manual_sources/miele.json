@@ -12,6 +12,12 @@
       "html_class": "cc-product-tile__product-image-link",
       "css_selector": "a.cc-product-tile__product-image-link",
       "filter": null
+    },
+    {
+      "html_tag": null,
+      "html_class": null,
+      "css_selector": "#productInfoTab > div > ul > li:nth-child(3) > a",
+      "filter": null
     }
   ],
   "pdf": {

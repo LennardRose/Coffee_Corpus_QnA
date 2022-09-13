@@ -2,10 +2,10 @@
 {
 "ELASTICSEARCH_URL" : "localhost",
 "ELASTICSEARCH_PORT" : "9200",
+
 "HDFS_URL" : "192.168.0.115",
 "HDFS_PORT" : "9870",
 "HDFS_USER" : "hadoop",
-"RECENT_MANUAL_COUNT" : "100",
 "MAX_TRY" : "3",
 "STANDARD_DATETIME_FORMAT" : "%Y-%m-%dT%H:%M:%S.%fZ",
 "STANDARD_DATE_FORMAT" :"%Y-%m-%d",

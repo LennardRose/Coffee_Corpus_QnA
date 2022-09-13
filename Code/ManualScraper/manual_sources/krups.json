@@ -1,14 +1,14 @@
 {
     "manufacturer_name": "Krups",
     "base_url": "https://www.krups.de/",
-    "onlyDynamic": false,
+    "onlyDynamic": true,
+    "sleepTime": 3,
     "paths": [
         "bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso",
 		"bedienungsanleitungen/Produkte/Getränkezubereitung/Filterkaffeemaschinen/csc/Filter",
 		"bedienungsanleitungen/Produkte/Getränkezubereitung/Kaffeevollautomaten/csc/FullAutomat",
 		"bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
     ],
-    "sleepTime": 2,
     "layers": [
         {
             "html_tag": null,

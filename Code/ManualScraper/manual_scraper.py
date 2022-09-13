@@ -8,21 +8,19 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from typing import List
-
 import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 import re
-import html5lib
 import client_factory
 import logging
 import ssl
 import os
 from tqdm import tqdm
 import time
+import config
 
 
 class ManualScraper:
@@ -52,10 +50,10 @@ class ManualScraper:
             driver_options.headless = True
 
             if os.name == 'posix':
-                path = os.path.join(utils.config["WEBDRIVER_DIR"], "linux", utils.config["WEBDRIVER_FILE"])
+                path = os.path.join(config.WEBDRIVER_DIR, "linux", config.WEBDRIVER_FILE)
                 return webdriver.Chrome(path, options=driver_options)
             else:
-                path = os.path.join(utils.config["WEBDRIVER_DIR"], "windows", utils.config["WEBDRIVER_FILE"])
+                path = os.path.join(config.WEBDRIVER_DIR, "windows", config.WEBDRIVER_FILE)
                 return webdriver.Chrome(executable_path=path, options=driver_options)
 
         except Exception as e:
@@ -113,31 +111,29 @@ class ManualScraper:
         saves all data
         :param URLs: An iterable with all the product pages URLs
         """
-
-        for URL in tqdm(URLs, desc="scraping "+str(len(URLs))+" products"):
+        for URL in tqdm(URLs, desc="scraping " + str(len(URLs)) + " products"):
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
 
                 for i, manual_link in enumerate(manual_links):
+
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
                         self.manual_config["base_url"],
                         self.manual_config[
                             "manufacturer_name"])
 
-                    if not self._was_already_saved(most_recent_saved_articles_url, URL):
-                        try:
-                            meta_data = self._get_meta_data(URL, manual_link, i)
-                        except IndexError:
-                            # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-                            # -> index access returns Index error as flag for skipping
-                            # next manual link
-                            continue
-                        fileBytes = self._get_pdf_bytes(manual_link)
-                        # save element
-                        logging.info("Save content of: " + manual_link)
-                        self._save(meta_data, fileBytes)
+                    if not self._check_was_already_saved_by_url(most_recent_saved_articles_url, manual_link):
 
+                        meta_data = self._get_meta_data(URL, manual_link, i)
+                        if meta_data is None:
+                            continue
+
+                        if not self._check_was_already_saved_by_meta(meta_data):
+                            fileBytes = self._get_pdf_bytes(manual_link)
+
+                            logging.info("Save content of: " + manual_link)
+                            self._save(meta_data, fileBytes)
             except Exception as e:
                 logging.error("No metadata found for " + URL)
                 logging.error(e)
@@ -188,10 +184,13 @@ class ManualScraper:
             manual_name = filteredManualNames
 
         product_name = product_name[number % len(product_name)].text
-        manual_name = manual_name[number].text
-        # If index higher than amount of manuals after filtering this manual got filtered by the manual name "eu conformity pdf" for example and thus should be skipped
-        # TODO here exception catchen wenn number > len(manuals) dann wurde erfolgreich die manuals nach namen gefiltert.
-
+        try:
+            manual_name = manual_name[number].text
+        except IndexError:
+            return None
+        # If index higher than amount of manuals after filtering this manual got filtered by the manual name ("eu conformity pdf" for example) and thus should be skipped
+        # -> index access returns Index error as flag for skipping
+        # return None so upper logic knows to continue to next manual link
 
         if "transform" in self.manual_config["meta"].keys():
             result = re.search(self.manual_config["meta"]["transform"], product_name.lstrip())
@@ -205,10 +204,13 @@ class ManualScraper:
         meta_data["product_name"] = utils.slugify(product_name)
         meta_data["manual_name"] = utils.slugify(manual_name)
         meta_data["filepath"] = str(meta_data["manufacturer_name"] + "/" + meta_data["product_name"] + "/")
-        filetype = os.path.splitext(manual_link)[1]
-        if filetype == "":
+        # clean url necessary for jura, example: 'https://www.jura.com/-/media/global/pdf/manuals-global/home/ENA/ENA
+        # -4/download_manual_ena4.pdf?la=de&hash=7DA7BC6A1C4BD6C6CA040FBF955CA5F2C37FC8CA&em_force=true'
+        filetype = utils.clean_url(os.path.splitext(manual_link)[1])
+        if filetype == "" or filetype is None:
             filetype = ".pdf"
-        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(meta_data["product_name"]):
+        if meta_data["product_name"] == meta_data["manual_name"] or meta_data["manual_name"].startswith(
+                meta_data["product_name"]):
             meta_data["filename"] = str(meta_data["manual_name"]) + filetype
         else:
             meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
@@ -274,7 +276,9 @@ class ManualScraper:
                 if self._is_relative_URL(link):
                     link = self.manual_config["base_url"] + link[1:]
 
-                links.append(link)
+                # bugfix for miele as it goes into infinity loop
+                if link != source_URL:
+                    links.append(link)
 
         return links
 
@@ -368,13 +372,13 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page == None and retry_count < int(utils.config["MAX_TRY"]):
+        while page is None and retry_count < config.MAX_TRY:
             try:
                 retry_count += 1
                 page = requests.get(URL, timeout=5)
             except Exception as e:
                 logging.warning("request unable to get: %s - retries left: %d", URL,
-                                int(utils.config["MAX_TRY"]) - retry_count)
+                                config.MAX_TRY - retry_count)
                 logging.warning(e)
         if page:
             return BeautifulSoup(page.content, 'html5lib')
@@ -390,7 +394,7 @@ class ManualScraper:
         """
         page = None
         retry_count = 0
-        while page is None and retry_count < int(utils.config["MAX_TRY"]):
+        while page is None and retry_count < config.MAX_TRY:
             try:
                 retry_count += 1
                 self.driver.get(URL)
@@ -399,9 +403,9 @@ class ManualScraper:
                 page = self.driver.page_source
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
-                                int(utils.config["MAX_TRY"]) - retry_count)
+                                config.MAX_TRY - retry_count)
                 logging.warning(e)
-        # self.driver.close()
+
         if page:
             return BeautifulSoup(page, 'html5lib')
         else:
@@ -417,7 +421,7 @@ class ManualScraper:
         else:
             return None
 
-    def _was_already_saved(self, most_recent_saved_articles_URLs, current_URL):
+    def _check_was_already_saved_by_url(self, most_recent_saved_articles_URLs, current_URL):
         """
         the first link in the list returned by the page is not always the most recent
         :param most_recent_saved_articles_url: the URLs of the most recent saved articles (in an earlier call)
@@ -467,3 +471,12 @@ class ManualScraper:
                         valid = valid
 
         return valid
+
+    def _check_was_already_saved_by_meta(self, meta_data):
+
+        doc_count = client_factory.get_meta_client().count_entries_by_product_and_manual(meta_data["manufacturer_name"],
+                                                                                         meta_data["product_name"],
+                                                                                         meta_data["manual_name"])
+        if doc_count is None:
+            return False
+        return doc_count > 0

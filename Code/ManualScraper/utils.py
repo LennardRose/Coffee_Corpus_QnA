@@ -14,52 +14,41 @@ import unicodedata
 import re
 import logging
 import json
+import config
+import pytz
+from urllib.parse import urljoin, urlparse
 
 
-#dont change this config without checking if it is a elasticsearch readable date-format (if you use elasticsearch) 
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time
-config = {}
-
-def init_global_config(config_path):
-    """
-    reads the config
-    initializes global variable to use everywhere
-    just make sure to import utils and not from utils import config, as this would import the config value as initialized to the moment of import
-    """
-    try:
-        with open(config_path, "r") as file:
-            global config 
-            config = json.load(file)
-    except:
-        logging.error("configfile not found.")
-
-
-def parse_date(date):
+def parse_date(index_date):
     """
     parses a date to the STANDARD_DATETIME_FORMAT from config 
-    :param date: the date to parse, can be str or date
+    :param index_date: the date to parse, can be str or date
     :return: the date in new format
     """
-    if type(date) == str:
-        date = re.sub(r"[a-zA-Z]+", " ", date)
-        date =  dateutil.parser.parse(date)
+    if type(index_date) == str:
+        index_date = re.sub(r"[a-zA-Z]+", " ", index_date)
+        index_date = dateutil.parser.parse(index_date)
 
-    return date.strftime(config["STANDARD_DATETIME_FORMAT"])
+    return index_date.strftime(config.STANDARD_DATETIME_FORMAT)
+
 
 def date_now():
     """
     returns current datetime in the STANDARD_DATETIME_FORMAT
     """
-    return parse_date(datetime.now())
+    return parse_date(datetime.now(pytz.timezone("Europe/Berlin")))
+
 
 def date_today():
     """
     returns todays date in the STANDARD_DATE_FORMAT
     """
-    return date.today().strftime(config["STANDARD_DATE_FORMAT"])
+    return date.today().strftime(config.STANDARD_DATE_FORMAT)
 
+def clean_url(url):
+    return urljoin(url, urlparse(url).path)
 
-def slugify(value, allow_unicode=False):
+def slugify(value, allow_unicode=True):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
@@ -68,7 +57,9 @@ def slugify(value, allow_unicode=False):
     trailing whitespace, dashes, and underscores.
     """
     value = str(value)
-    value.replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue").replace("ß", "ss")
+    value.replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü",
+                                                                                                                 "Ue").replace(
+        "ß", "ss")
     if allow_unicode:
         value = unicodedata.normalize('NFKC', value)
     else:
@@ -76,6 +67,4 @@ def slugify(value, allow_unicode=False):
     value = re.sub(r'[^\w\s-]', '', value.lower())
     return re.sub(r'[-\s]+', '_', value).strip('-_')
 
- #  titlestring.replace(" ", "_").replace(",", "_").replace(":", "_").replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue")
-  
-
+#  titlestring.replace(" ", "_").replace(",", "_").replace(":", "_").replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue")
