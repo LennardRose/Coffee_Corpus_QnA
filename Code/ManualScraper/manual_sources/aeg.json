@@ -1,0 +1,31 @@
+{
+    "manufacturer_name": "AEG",
+    "base_url": "https://www.aeg.de",
+    "onlyDynamic": false,
+    "paths": [
+        "/kitchen/small-kitchen-appliances/coffee-makers/"
+    ],
+    "layers": [
+      {
+        "html_tag": "a",
+        "html_class": "plp-product",
+        "css_selector": "a.plp-product",
+        "filter": null
+      }
+    ],
+    "pdf": {
+      "html_tag": null,
+      "html_class": null,
+      "css_selector": "div.tech-specs__content > div > div > ul > li:nth-child(2) > a",
+      "filter": [
+        {
+            "condition_string" : "productinformation",
+            "include_condition" : false
+        }
+      ]
+    },
+    "meta": {
+      "manual_name": "div.tech-specs__content > div > div > ul > li:nth-child(2) > a span.tech-specs-documents__item-meta-title",
+      "product_name": "h1.product-landing__model-name"
+    }
+  }
