@@ -21,7 +21,6 @@ HDFS_USER = "hadoop"
 # -------------------------------ElasticSearch------------------------------------------
 ES_URL = '127.0.0.1'
 ES_PORT = '9200'
-RECENT_ENTRIES_COUNT = 100
 
 sourceIndex = "manuals_config"
 sourceMapping = {
