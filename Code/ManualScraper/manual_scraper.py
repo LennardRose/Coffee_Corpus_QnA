@@ -120,8 +120,7 @@ class ManualScraper:
 
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
                         self.manual_config["base_url"],
-                        self.manual_config[
-                            "manufacturer_name"])
+                        self.manual_config["manufacturer_name"])
 
                     if not self._check_was_already_saved_by_url(most_recent_saved_articles_url, manual_link):
 
@@ -401,6 +400,7 @@ class ManualScraper:
                 if "sleepTime" in self.manual_config.keys():
                     time.sleep(self.manual_config["sleepTime"])  # load page
                 page = self.driver.page_source
+
             except Exception as e:
                 logging.warning("selenium unable to get: %s - retries left: %d", URL,
                                 config.MAX_TRY - retry_count)

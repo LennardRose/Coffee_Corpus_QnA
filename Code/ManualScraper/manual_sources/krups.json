@@ -79,7 +79,7 @@
         {
             "manual_name" : "p.c__ref.is-caption.ng-star-inserted",
             "product_name" : "p.c__ref.is-caption.ng-star-inserted",
-            "transform": "([\\S]+).$"
+            "transform": "([\\S]+)$"
         }
 
 }
