@@ -1,8 +1,8 @@
 {
   "manufacturer_name": "Miele",
   "base_url": "https://www.miele.de/",
-  "onlyDynamic": false,
-  "sleepTime": 5,
+  "onlyDynamic": true,
+  "sleepTime": 3.5,
   "paths": [
     "https://www.miele.de/haushalt/produktauswahl-kaffeevollautomaten-2513.htm"
   ],
@@ -23,12 +23,26 @@
   "pdf": {
     "html_tag": null,
     "html_class": null,
-    "css_selector": "div.tabContent.delimiter-blank-small-top.delimiter-blank-bottom table tbody tr:nth-child(2) a",
+    "css_selector": "#productInfoTabContent > div.ym-grid-full > div > div:nth-child(3) > div > div > div > table a",
     "filter": null
   },
   "meta": {
-    "manual_name": "div.tabContent.delimiter-blank-small-top.delimiter-blank-bottom table tbody tr:nth-child(2) td:first-child",
-    "product_name": "h1 > strong"
+    "manual_name": "#productInfoTabContent > div.ym-grid-full > div > div:nth-child(3) > div > div > div > table > tbody > tr > td:first-child",
+    "product_name": "h1 > strong",
+    "filter" : [
+      {
+          "condition_string": "Garantieheft",
+          "include_condition": false
+      },
+      {
+          "condition_string": "EU",
+          "include_condition": false
+      },
+      {
+          "condition_string": "Kurz",
+          "include_condition": false
+      }
+    ]
   }
 }
 

@@ -143,8 +143,6 @@ class ManualScraper:
                         meta_data = self._get_meta_data(URL, manual_link, i)
                         if meta_data is None:
                             continue
-                        if meta_data["manual_name"] == "" and meta_data["product_name"] == "":
-                            print("empty names: ", URL)
 
                         if not self._check_was_already_saved_by_meta(meta_data):
                             fileBytes = self._get_pdf_bytes(manual_link)
@@ -184,27 +182,29 @@ class ManualScraper:
                 product_name = soup.select(self.manual_config["meta"]["product_name"])
                 manual_name = soup.select(self.manual_config["meta"]["manual_name"])
 
+        filteredProductIndices = []
+        filteredManualIndices = []
         if "filter" in self.manual_config["meta"].keys() and self.manual_config["meta"]["filter"] is not None:
-            filteredProductNames = []
-            filteredManualNames = []
-            for manualTag in manual_name:
+            for idx, manualTag in enumerate(manual_name):
                 if not self._is_valid(manualTag.text, self.manual_config["meta"]["filter"]):
-                    continue
-                filteredManualNames.append(manualTag)
-
-            for productTag in product_name:
+                    filteredManualIndices.append(idx)
+            for idx, productTag in enumerate(product_name):
                 if not self._is_valid(productTag.text, self.manual_config["meta"]["filter"]):
-                    continue
-                filteredProductNames.append(productTag)
+                    filteredProductIndices.append(idx)
 
-            product_name = filteredProductNames
-            manual_name = filteredManualNames
-
-        product_name = product_name[number % len(product_name)].text
-        try:
-            manual_name = manual_name[number].text
-        except IndexError:
+        if number not in filteredProductIndices:
+            product_name = product_name[number % len(product_name)].text
+        else:
             return None
+
+        if number not in filteredManualIndices:
+            try:
+                manual_name = manual_name[number].text
+            except IndexError:
+                return None
+        else:
+            return None
+
         # If index higher than amount of manuals after filtering this manual got filtered by the manual name ("eu conformity pdf" for example) and thus should be skipped
         # -> index access returns Index error as flag for skipping
         # return None so upper logic knows to continue to next manual link

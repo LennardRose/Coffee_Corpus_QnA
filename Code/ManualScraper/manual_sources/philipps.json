@@ -94,6 +94,10 @@
       {
         "condition_string": "Important Information Manual",
         "include_condition": false
+      },
+      {
+        "condition_string": "Kaffeepadmaschine",
+        "include_condition": false
       }
     ]
   }
