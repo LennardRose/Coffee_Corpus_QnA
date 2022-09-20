@@ -14,6 +14,7 @@ CLIENTS = {
     "MANUAL_CLIENT": "elastic",
     "FILE_CLIENT": "mock_hdfs"
 }
+CONFIG_PATH = "./manual_sources"
 # -------------------------------HDFS---------------------------------------------------
 HDFS_URL = "192.168.0.115"
 HDFS_PORT = "9870"

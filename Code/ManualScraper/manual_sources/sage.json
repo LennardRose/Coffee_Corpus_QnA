@@ -1,7 +1,7 @@
 {
   "manufacturer_name": "Sage",
   "base_url": "https://www.sageappliances.com/",
-  "sleepTime": 3,
+  "sleepTime": 3.5,
   "onlyDynamic": true,
   "paths": [
     "eu/de/products/espresso.html",

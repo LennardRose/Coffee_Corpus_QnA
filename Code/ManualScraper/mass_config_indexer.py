@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, join
 
 if __name__ == "__main__":
-    path = "./manual_sources"
+    path = config.CONFIG_PATH
 
     es_client = ElasticSearchClient()
 
@@ -14,5 +14,10 @@ if __name__ == "__main__":
         if isfile(join(path, f)):
             with open(join(path, f), "r", encoding='utf-8') as file:
                 source = json.load(file)
-
-                es_client.index_config(source["manufacturer_name"], source)
+                try:
+                    #if source["manufacturer_name"] == "Krups":
+                    #   continue
+                    es_client.index_config(source["manufacturer_name"], source)
+                except Exception as e:
+                    print(source["manufacturer_name"])
+                    print(e)

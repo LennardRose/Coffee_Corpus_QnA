@@ -103,7 +103,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
             doc (object/dict): document to insert
         """
         result = self.es_client.index(index=config.sourceIndex, id=id, body=doc)
-        if not result["result"] == "created":
+        if not (result["result"] == "created" or result["result"] == "updated"):
             raise Exception("config could not be indexed")
 
     def get_latest_entry_URL(self, source_URL, manufacturer_name):

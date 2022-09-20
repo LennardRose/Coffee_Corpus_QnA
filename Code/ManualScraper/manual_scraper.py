@@ -47,14 +47,16 @@ class ManualScraper:
         path = None
         try:
             driver_options = Options()
+            #driver_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+            #trying to block logging from webdriver as it spams the log unnecessarily
             driver_options.headless = True
 
             if os.name == 'posix':
                 path = os.path.join(config.WEBDRIVER_DIR, "linux", config.WEBDRIVER_FILE)
-                return webdriver.Chrome(path, options=driver_options)
+                return webdriver.Chrome(path, options=driver_options, service_log_path='/dev/null')
             else:
                 path = os.path.join(config.WEBDRIVER_DIR, "windows", config.WEBDRIVER_FILE)
-                return webdriver.Chrome(executable_path=path, options=driver_options)
+                return webdriver.Chrome(executable_path=path, options=driver_options, service_log_path='NUL')
 
         except Exception as e:
             logging.error("failed to initialize webdriver for selenium, /"
@@ -75,6 +77,9 @@ class ManualScraper:
             logging.info("Start scraping from manuals source URL: %s", manual_config["base_url"])
 
             links = [manual_config["paths"]]
+            requestLinks = []
+            if "requests" in manual_config.keys():
+                requestLinks = manual_config["requests"]["urls"]
 
             if manual_config["layers"] and len(manual_config["layers"]) != 0:
 
@@ -96,6 +101,17 @@ class ManualScraper:
                             # to the next layer, ultimatively the last one gets filled only with "product pages" or
                             # the destination link on which the manuals are
                             links[i + 1].append(old_link)
+
+                    # in case of request urls:
+                    while requestLinks:
+                        old_link = requestLinks.pop(0)
+                        new_links = self._get_request_links(old_link, manual_config["requests"]["path"], manual_config["requests"]["urlKey"], manual_config["layers"][i])
+                        if new_links:
+                            links[i + 1].extend(set(new_links))
+
+
+
+
             # final duplicate filtering:
             links[-1] = list(set(links[-1]))
             # TODO links direkt als set machen? spart zusätzliches scrapen
@@ -127,6 +143,8 @@ class ManualScraper:
                         meta_data = self._get_meta_data(URL, manual_link, i)
                         if meta_data is None:
                             continue
+                        if meta_data["manual_name"] == "" and meta_data["product_name"] == "":
+                            print("empty names: ", URL)
 
                         if not self._check_was_already_saved_by_meta(meta_data):
                             fileBytes = self._get_pdf_bytes(manual_link)
@@ -249,6 +267,49 @@ class ManualScraper:
                 logging.error(e)
                 client_factory.get_meta_client().delete_meta_data(current_id)
 
+    def _get_request_links(self, url, dictPath, urlKey, layer):
+        """
+        creates a list with the links on the path with respect to the constraints of the given layer
+        also completes every relative URL with the base_url if necessary
+        checks every link if it matches the given conditions in the filter
+        :param path: the path of the source, may be just the URL path or a complete URL
+        :return: a list with all valid links on the page
+        """
+
+        links = []
+
+        if self._is_relative_URL(url):
+            source_URL = self.manual_config["base_url"] + url
+        else:
+            source_URL = url
+
+        try:
+            response = requests.get(source_URL)
+            if response.status_code != 200:
+                return []
+
+            products = response.json()
+            for key in dictPath:
+                products = products[key]
+
+            for product in products:
+                link = product[urlKey]
+
+                if self._is_valid(link, layer["filter"]):
+
+                    if self._is_relative_URL(link):
+                        link = self.manual_config["base_url"] + link[1:]
+
+                    # bugfix for miele as it goes into infinity loop
+                    if link != source_URL:
+                        links.append(link)
+
+        except Exception as e:
+            logging.error("No response received for request: " + source_URL)
+
+
+        return links
+
     def _get_layer_links(self, path, layer):
         """
         creates a list with the links on the path with respect to the constraints of the given layer
@@ -347,12 +408,14 @@ class ManualScraper:
         return soup by trying first to get it as a static page, after failure tries as a dynamic page
         :params URL: the url
         """
-        soup = self._get_soup_of_static_page(URL)
-
         # for example philipps needs to be dynamic soup by default as static only retrieves a few
         onlyDynamic = False
         if "onlyDynamic" in self.manual_config.keys():
             onlyDynamic = self.manual_config["onlyDynamic"]
+
+        soup = None
+        if not onlyDynamic:
+            soup = self._get_soup_of_static_page(URL)
 
         if soup is None or onlyDynamic:
             soup = self._get_soup_of_dynamic_page(URL)

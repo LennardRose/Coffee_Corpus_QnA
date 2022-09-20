@@ -11,23 +11,25 @@
 import os, glob
 from elasticsearch import Elasticsearch
 import json
+import config
+from elastic_search_client import ElasticSearchClient
 
-client = Elasticsearch("localhost:9200")
-
+client = ElasticSearchClient()
 
 # posix uses "/", and Windows uses ""
 if os.name == 'posix':
-    slash = "/" # for Linux and macOS
+    slash = "/"  # for Linux and macOS
 else:
-    slash = chr(92) # '\' for Windows
+    slash = chr(92)  # '\' for Windows
+
 
 def _current_path():
-    return os.path.dirname(os.path.realpath( __file__ ))
+    return os.path.dirname(os.path.realpath(__file__))
+
 
 # default path is the script's current dir
 def _get_files_in_dir():
-
-    self = os.path.join(_current_path(), "manual_sources")
+    self = os.path.join(_current_path(), config.CONFIG_PATH)
 
     file_list = []
 
@@ -43,6 +45,7 @@ def _get_files_in_dir():
 
     return file_list
 
+
 def _get_data_from_json_file(file):
     data = None
 
@@ -51,40 +54,36 @@ def _get_data_from_json_file(file):
 
     return data
 
+
 # pass a directory (relative path) to function call
 all_files = _get_files_in_dir()
 
-print ("Files to index:", len( all_files ))
-
-if not client.indices.exists(index="manual_config"):
-    print("Index manual_config not found, initialize index.")
-    client.indices.create(index="manual_config")
+print("Files to index:", len(all_files))
 
 python_path = os.path.join(_current_path(), "venv", "Scripts", "python.exe")
 main_path = os.path.join(_current_path(), "main.py")
-
 
 index_count = 0
 # iterate over the list of files
 for file in enumerate(all_files):
 
     # get the data inside the file
-    data = _get_data_from_json_file( file[1] )
+    data = _get_data_from_json_file(file[1])
 
     query = {
-        "query" :  
-            { "bool" : 
-                { "must" : [ 
-                    {"match_phrase": { "manufacturer_name": { "query" : data["manufacturer_name"] } } },
-                    {"match_phrase": { "base_url": { "query" : data["base_url"] } } }
-                ]} 
+        "query":
+            {"bool":
+                {"must": [
+                    {"match_phrase": {"manufacturer_name": {"query": data["manufacturer_name"]}}},
+                    {"match_phrase": {"base_url": {"query": data["base_url"]}}}
+                ]}
             }
     }
 
-    already_indexed_document = client.search(index="manuals_config", body=query)
+    already_indexed_document = client.es_client.search(index=config.sourceIndex, body=query)
 
     if already_indexed_document["hits"]["total"]["value"] == 0:
-        response = client.index(index="manual_config", body=data, doc_type="_doc")
+        response = client.es_client.index(index=config.sourceIndex, body=data, doc_type="_doc")
         if response["result"] == "created":
             index_count += 1
             print("@hourly " + python_path + " " + main_path + " --elasticsearch " + response["_id"])
@@ -92,4 +91,3 @@ for file in enumerate(all_files):
         print("file was already indexed, skip")
 
 print("indexed: " + str(index_count) + " files")
-

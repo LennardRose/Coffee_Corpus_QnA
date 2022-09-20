@@ -84,6 +84,10 @@
         "include_condition": false
       },
       {
+        "condition_string" : "EU Declaration of Conformity",
+        "include_condition": false
+      },
+      {
         "condition_string" : "Landesspezifische Werbebroschüre",
         "include_condition": false
       },

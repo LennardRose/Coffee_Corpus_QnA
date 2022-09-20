@@ -3,12 +3,17 @@
     "base_url": "https://www.krups.de/",
     "onlyDynamic": true,
     "sleepTime": 3,
-    "paths": [
-        "bedienungsanleitungen/Produkte/Getränkezubereitung/Siebträgermaschinen/csc/Espresso",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Filterkaffeemaschinen/csc/Filter",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Kaffeevollautomaten/csc/FullAutomat",
-		"bedienungsanleitungen/Produkte/Getränkezubereitung/Nespresso/csc/Nespresso"
-    ],
+    "paths": [],
+    "requests": {
+        "path" : ["ifuCategory", "products"],
+        "urlKey" : "url",
+        "urls" : [
+            "https://brandsites.api.groupe-seb.com/occ/v2/Krups-DE/basestores/csshierarchy?fields=FULL&type=IFU&selectedCategory=Espresso&lang=de&curr=EUR",
+            "https://brandsites.api.groupe-seb.com/occ/v2/Krups-DE/basestores/csshierarchy?fields=FULL&type=IFU&selectedCategory=Filter&lang=de&curr=EUR",
+            "https://brandsites.api.groupe-seb.com/occ/v2/Krups-DE/basestores/csshierarchy?fields=FULL&type=IFU&selectedCategory=Nespresso&lang=de&curr=EUR",
+            "https://brandsites.api.groupe-seb.com/occ/v2/Krups-DE/basestores/csshierarchy?fields=FULL&type=IFU&selectedCategory=FullAutomat&lang=de&curr=EUR"
+            ]
+    },
     "layers": [
         {
             "html_tag": null,
@@ -79,7 +84,7 @@
         {
             "manual_name" : "p.c__ref.is-caption.ng-star-inserted",
             "product_name" : "p.c__ref.is-caption.ng-star-inserted",
-            "transform": "([\\S]+)$"
+            "transform": "([\\S]+)\\s*$"
         }
 
 }
