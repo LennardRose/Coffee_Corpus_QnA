@@ -127,6 +127,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                         ]}
                     },
                 "sort": [{"index_time": {"order": "desc"}}],
+                "size": 10000
             }
             docs = self.es_client.search(index=config.metaIndex, body=query)
 
