@@ -1,4 +1,6 @@
 # -------------------------------COMMON------------------------------------------
+import logging
+
 MAX_TRY = 3
 # dont change this config without checking if it is a elasticsearch readable date-format (if you use elasticsearch)
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time
@@ -22,7 +24,7 @@ HDFS_USER = "hadoop"
 # -------------------------------ElasticSearch------------------------------------------
 ES_URL = '127.0.0.1'
 ES_PORT = '9200'
-
+ES_LOG_LEVEL = logging.WARNING
 sourceIndex = "manuals_config"
 sourceMapping = {
 

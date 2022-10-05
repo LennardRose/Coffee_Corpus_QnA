@@ -11,6 +11,7 @@
 from abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
+import elasticsearch
 import utils
 import config
 
@@ -30,7 +31,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
         logging.info("Init Elasticsearch client with url: %s : %s", config.ES_URL,
                      config.ES_PORT)
         self.es_client = Elasticsearch([config.ES_URL + ":" + config.ES_PORT])
-
+        elasticsearch.logger.setLevel(config.ES_LOG_LEVEL)
         self._initialize_indizes_if_not_there()
 
     def _initialize_indizes_if_not_there(self):
@@ -50,7 +51,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
         deletes meta_data doc in manual_meta_data index
         """
-        self.es_client.delete(index="manual_meta_data", id=id)
+        self.es_client.delete(index=config.metaIndex, id=id)
 
     def get_manual_config(self, id):
         """

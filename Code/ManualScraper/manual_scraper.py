@@ -47,8 +47,8 @@ class ManualScraper:
         path = None
         try:
             driver_options = Options()
-            #driver_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-            #trying to block logging from webdriver as it spams the log unnecessarily
+            # driver_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+            # trying to block logging from webdriver as it spams the log unnecessarily
             driver_options.headless = True
 
             if os.name == 'posix':
@@ -105,12 +105,11 @@ class ManualScraper:
                     # in case of request urls:
                     while requestLinks:
                         old_link = requestLinks.pop(0)
-                        new_links = self._get_request_links(old_link, manual_config["requests"]["path"], manual_config["requests"]["urlKey"], manual_config["layers"][i])
+                        new_links = self._get_request_links(old_link, manual_config["requests"]["path"],
+                                                            manual_config["requests"]["urlKey"],
+                                                            manual_config["layers"][i])
                         if new_links:
                             links[i + 1].extend(set(new_links))
-
-
-
 
             # final duplicate filtering:
             links[-1] = list(set(links[-1]))
@@ -131,7 +130,7 @@ class ManualScraper:
             try:
                 # all the different manuals
                 manual_links = self._get_layer_links(URL, self.manual_config["pdf"])
-
+                
                 for i, manual_link in enumerate(manual_links):
 
                     most_recent_saved_articles_url = client_factory.get_meta_client().get_latest_entry_URL(
@@ -232,6 +231,11 @@ class ManualScraper:
         else:
             meta_data["filename"] = str(meta_data["product_name"] + "_" + meta_data["manual_name"] + filetype)
 
+        # windows filename (including path) length is restricted
+        if len(meta_data["filepath"] + meta_data["filename"]) > 255:
+            offset = 255 - len(meta_data["filepath"])
+            meta_data["filename"] = meta_data["filename"][:offset-len(filetype)] + filetype
+
         meta_data["URL"] = manual_link
         meta_data["source_URL"] = source_URL
         meta_data["index_time"] = utils.date_now()
@@ -306,7 +310,6 @@ class ManualScraper:
 
         except Exception as e:
             logging.error("No response received for request: " + source_URL)
-
 
         return links
 
