@@ -194,3 +194,7 @@ fabric.properties
 
 
 ./drivers
+
+*/.idea/*
+.idea/*
+*/.idea
