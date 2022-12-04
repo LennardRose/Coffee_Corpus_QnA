@@ -12,8 +12,8 @@ from abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
 import elasticsearch
-import utils
-import config
+from Code.Utils import utils
+from Code.config import config
 
 
 class ElasticSearchClient(MetaClient, ManualClient):
@@ -21,6 +21,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
     Wrapper Class for the elasticsearch client
     offers all functionality concerning communication with the elasticsearch server
     """
+
 
     def __init__(self):
         """
@@ -34,24 +35,32 @@ class ElasticSearchClient(MetaClient, ManualClient):
         elasticsearch.logger.setLevel(config.ES_LOG_LEVEL)
         self._initialize_indizes_if_not_there()
 
+
     def _initialize_indizes_if_not_there(self):
         """
         initializes needed indizes if not already there
         """
-        if not self.es_client.indices.exists(index=config.sourceIndex):
-            logging.info("Index " + config.sourceIndex + " not found, initialize index.")
-            self.es_client.indices.create(index=config.sourceIndex)  # , body=config.sourceMapping, ignore=400)
+        if not self.es_client.indices.exists(index=config.manuals_sourceIndex):
+            logging.info("Index " + config.manuals_sourceIndex + " not found, initialize index.")
+            self.es_client.indices.create(index=config.manuals_sourceMapping,
+                                          ignore=400)  # , body=config.sourceMapping, ignore=400)
             # ignore 400 cause by IndexAlreadyExistsException when creating an index
 
-        if not self.es_client.indices.exists(index=config.metaIndex):
-            logging.info("Index " + config.metaIndex + " not found, initialize index.")
-            self.es_client.indices.create(index=config.metaIndex, body=config.metaMapping, ignore=400)
+        if not self.es_client.indices.exists(index=config.manuals_metaIndex):
+            logging.info("Index " + config.manuals_metaIndex + " not found, initialize index.")
+            self.es_client.indices.create(index=config.manuals_metaIndex, body=config.manuals_metaMapping, ignore=400)
 
-    def delete_meta_data(self, id):
+        if not self.es_client.indices.exists(index=config.corpus_metaIndex):
+            logging.info("Index " + config.corpus_metaIndex + " not found, initialize index.")
+            self.es_client.indices.create(index=config.manuals_metaIndex, body=config.corpus_metaMapping, ignore=400)
+
+
+    def delete_manual_metadata(self, id):
         """
         deletes meta_data doc in manual_meta_data index
         """
-        self.es_client.delete(index=config.metaIndex, id=id)
+        self.es_client.delete(index=config.manuals_metaIndex, id=id)
+
 
     def get_manual_config(self, id):
         """
@@ -61,11 +70,12 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
 
         query = {"query": {"match": {"_id": {"query": id}}}}
-        docs = self.es_client.search(index=config.sourceIndex, body=query)
+        docs = self.es_client.search(index=config.manuals_sourceIndex, body=query)
         if docs["hits"]["hits"]:
             return docs["hits"]["hits"][0]["_source"]
         else:
             logging.error("id: " + id + " not found.")
+
 
     def get_all_manual_configs(self):
         """
@@ -74,28 +84,30 @@ class ElasticSearchClient(MetaClient, ManualClient):
         """
 
         query = {"size": 1000, "query": {"match_all": {}}}
-        docs = self.es_client.search(index=config.sourceIndex, body=query)
+        docs = self.es_client.search(index=config.manuals_sourceIndex, body=query)
         result = []
         for doc in docs["hits"]["hits"]:
             result.append(doc["_source"])
         return result
 
-    def index_meta_data(self, metadata_json):
+
+    def index_manual_metadata(self, metadata_json):
         """
         index meta data to elasticsearch
         :return: the id of the new indexed meta data
         """
 
-        result = self.es_client.index(index=config.metaIndex, body=metadata_json,
+        result = self.es_client.index(index=config.manuals_metaIndex, body=metadata_json,
                                       doc_type="_doc")
 
         if result["result"] == "created" and result["_id"]:
             return result["_id"]
 
         else:
-            raise Exception("meta_data not created")
+            raise Exception("manual metadata not created")
 
-    def index_config(self, id, doc):
+
+    def index_manual_config(self, id, doc):
         """
         does index a single doc of metadata for restriction/measures
 
@@ -103,9 +115,10 @@ class ElasticSearchClient(MetaClient, ManualClient):
             id (string): id of the document
             doc (object/dict): document to insert
         """
-        result = self.es_client.index(index=config.sourceIndex, id=id, body=doc)
+        result = self.es_client.index(index=config.manuals_sourceIndex, id=id, body=doc)
         if not (result["result"] == "created" or result["result"] == "updated"):
             raise Exception("config could not be indexed")
+
 
     def get_latest_entry_URL(self, source_URL, manufacturer_name):
         """
@@ -130,7 +143,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 "sort": [{"index_time": {"order": "desc"}}],
                 "size": 10000
             }
-            docs = self.es_client.search(index=config.metaIndex, body=query)
+            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
 
             for doc in docs["hits"]["hits"]:
                 result.append(doc["_source"]["URL"])
@@ -138,6 +151,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
             return result
         except:
             return None
+
 
     def count_entries_by_product_and_manual(self, manufacturer, product_name, manual_name):
         """
@@ -159,29 +173,102 @@ class ElasticSearchClient(MetaClient, ManualClient):
                     }
                 }
             }
-            response = self.es_client.count(index=config.metaIndex, body=query)
+            response = self.es_client.count(index=config.manuals_metaIndex, body=query)
 
             return response["count"]
         except:
             return None
 
 
+    def index_corpusfile_metadata(self, corpusfile_metadata):
+        """
+        index meta data to elasticsearch
+        :return: the id of the new indexed meta data
+        """
+
+        result = self.es_client.index(index=config.corpus_metaIndex, body=corpusfile_metadata,
+                                      doc_type="_doc")
+
+        if result["result"] == "created" and result["_id"]:
+            return result["_id"]
+
+        else:
+            raise Exception("corpusfile metadata not created")
+
+
+    def delete_corpusfile_metadata(self, id):
+        """
+        deletes corpus_metadata doc in corpus_metaIndex index
+        """
+        self.es_client.delete(index=config.corpus_metaIndex, id=id)
+
+
+    def get_corpusfile_metadata(self, manufacturer, product_name, language):
+
+        try:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": []
+                    }
+                }
+            }
+
+            if manufacturer:
+                query["query"]["bool"]["must"].append({"match": {"manufacturer_name": manufacturer}})
+            if product_name:
+                query["query"]["bool"]["must"].append({"match": {"product_name": product_name}})
+            if language:
+                query["query"]["bool"]["must"].append({"match": {"language": language}})
+
+            if not query["query"]["bool"]["must"]:
+                # return whole corpusfile or tell application to answer based on
+                # all it learned
+                return None
+
+            docs = self.es_client.count(index=config.corpus_metaIndex, body=query)
+
+            if docs["hits"]["hits"]:
+                return docs["hits"]["hits"]
+            else:
+                logging.error("No corpus for: " + str(query["query"]["bool"]["must"]) + " not found.")
+        except:
+            return None
+
+
 class MockElasticSearchClient(MetaClient, ManualClient):
 
-    def index_meta_data(self, metadata_json):
+    def delete_corpusfile_metadata(self, id):
+        pass
+
+
+    def index_manual_metadata(self, metadata_json):
         return True
+
 
     def get_latest_entry_URL(self, source_URL, region):
         return False
 
-    def delete_meta_data(self, id):
+
+    def delete_manual_metadata(self, id):
         return True
+
 
     def get_manual_config(self, id):
         return True
 
+
     def get_all_manual_configs(self):
         return True
 
+
     def __init__(self):
         pass
+
+
+    def get_corpusfile_metadata(self, manufacturer, product_name, language):
+        return True
+
+
+    def index_corpusfile_metadata(self, corpusfile_metadata):
+        return True

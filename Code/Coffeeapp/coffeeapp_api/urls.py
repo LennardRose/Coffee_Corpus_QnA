@@ -1,4 +1,4 @@
-"""coffeeapp URL Configuration
+"""Coffeeapp URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.0/topics/http/urls/
@@ -13,13 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
-from coffeeapp_api import urls as coffeeapp_urls
+from .views import (
+    CoffeeAppApiView,
+)
 
 urlpatterns = [
-    path("", include(coffeeapp_urls)),
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    path('coffeeapp/', include(coffeeapp_urls)),
+    path('', CoffeeAppApiView.as_view()),
+    path('api', CoffeeAppApiView.as_view()),
 ]

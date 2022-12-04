@@ -8,7 +8,7 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-import client_factory
+from Code.Clients import client_factory
 import argparse
 import sys
 

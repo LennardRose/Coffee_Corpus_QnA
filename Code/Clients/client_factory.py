@@ -8,10 +8,11 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from hdfs_client import HDFSClient, MOCKHDFSClient
-from abstract_client import *
-from elastic_search_client import ElasticSearchClient, MockElasticSearchClient
-import config
+from hdfs_client import HDFSClient
+from lfs_client import LFSClient
+from Code.Clients.abstract_client import *
+from Code.Clients.elastic_search_client import ElasticSearchClient, MockElasticSearchClient
+from Code.config import config
 
 _file_client = None
 _manual_client = None
@@ -30,7 +31,7 @@ def get_meta_client() -> MetaClient:
 
 def get_manual_client() -> ManualClient:
     """
-    returns a client for article_configs
+    returns a client for manual_configs
     """
     global _manual_client
     if _manual_client is None:
@@ -60,7 +61,7 @@ def _read_client_from_config(client_type):
         return MockElasticSearchClient()
     elif client_name == "hdfs":
         return HDFSClient()
-    elif client_name == "mock_hdfs":
-        return MOCKHDFSClient()
+    elif client_name == "lfs":
+        return LFSClient()
     else:
         logging.error("Unable to find client: " + client_name)

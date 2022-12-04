@@ -8,16 +8,14 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-import os
 
 from tqdm import tqdm
 
 from argument_parser_wrapper import ArgumentParserWrapper
 from manual_scraper import ManualScraper
 import logging
-import utils
 import sys
-import config
+from Code.config import config
 
 if __name__ == '__main__':
 

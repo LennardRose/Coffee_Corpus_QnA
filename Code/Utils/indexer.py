@@ -9,10 +9,9 @@
 #                                                                   #
 #####################################################################
 import os, glob
-from elasticsearch import Elasticsearch
 import json
-import config
-from elastic_search_client import ElasticSearchClient
+from Code.config import config
+from Code.Clients.elastic_search_client import ElasticSearchClient
 
 client = ElasticSearchClient()
 
@@ -60,8 +59,8 @@ all_files = _get_files_in_dir()
 
 print("Files to index:", len(all_files))
 
-python_path = os.path.join(_current_path(), "venv", "Scripts", "python.exe")
-main_path = os.path.join(_current_path(), "main.py")
+python_path = os.path.join(_current_path(), "../ManualScraper/venv", "Scripts", "python.exe")
+main_path = os.path.join(_current_path(), "../ManualScraper/main.py")
 
 index_count = 0
 # iterate over the list of files
@@ -80,10 +79,10 @@ for file in enumerate(all_files):
             }
     }
 
-    already_indexed_document = client.es_client.search(index=config.sourceIndex, body=query)
+    already_indexed_document = client.es_client.search(index=config.manuals_sourceIndex, body=query)
 
     if already_indexed_document["hits"]["total"]["value"] == 0:
-        response = client.es_client.index(index=config.sourceIndex, body=data, doc_type="_doc")
+        response = client.es_client.index(index=config.manuals_sourceIndex, body=data, doc_type="_doc")
         if response["result"] == "created":
             index_count += 1
             print("@hourly " + python_path + " " + main_path + " --elasticsearch " + response["_id"])

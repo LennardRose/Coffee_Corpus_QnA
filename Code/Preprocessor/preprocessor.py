@@ -219,3 +219,6 @@ class Preprocessor:
         df['text'] = df['text'].str.replace('�','.')
 
         return df
+
+    def _save_corpus_metadata(self):
+        pass # TODO

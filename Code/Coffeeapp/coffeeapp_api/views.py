@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from .serializers import QuestionSerializer
+from .question_answering import QuestionAnswerer
 from rest_framework.renderers import TemplateHTMLRenderer
 
 
@@ -25,16 +25,14 @@ class CoffeeAppApiView(APIView):
         '''
         ask a question
         '''
-        question = {
-            'manufacturer': request.data.get('manufacturer'),
-            'model': request.data.get('model'),
-            'question': request.data.get('question')
-        }
 
-        serializer = QuestionSerializer(question)
+        questionanswerer = QuestionAnswerer(request.data.get('manufacturer'),
+                                            request.data.get('product_name'),
+                                            request.data.get('language'),
+                                            request.data.get('questions'))
 
-        if serializer.is_valid():
-            serializer.ask()
-            return Response(serializer.answer, status=status.HTTP_200_OK)
+        if questionanswerer.is_valid():
+            questionanswerer.ask()
+            return Response(questionanswerer.answers, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(questionanswerer.errors, status=status.HTTP_400_BAD_REQUEST)

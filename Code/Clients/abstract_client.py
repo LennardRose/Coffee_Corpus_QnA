@@ -11,26 +11,44 @@
 from abc import ABC, abstractmethod
 import logging
 
+
 class MetaClient(ABC):
-    
+
     @abstractmethod
-    def index_meta_data(self, metadata_json):
+    def index_manual_metadata(self, metadata_json):
         logging.error("Method not implemented")
+
 
     @abstractmethod
     def get_latest_entry_URL(self, source_URL, region):
         logging.error("Method not implemented")
 
+
     @abstractmethod
-    def delete_meta_data(self, id):
+    def delete_manual_metadata(self, id):
         logging.error("Method not implemented")
+
+    @abstractmethod
+    def index_corpusfile_metadata(self, corpusfile_metadata):
+        logging.error("Method not implemented")
+
+    @abstractmethod
+    def get_corpusfile_metadata(self, manufacturer, product_name, language):
+        logging.error("Method not implemented")
+
+
+    @abstractmethod
+    def delete_corpusfile_metadata(self, id):
+        logging.error("Method not implemented")
+
 
 
 class ManualClient(ABC):
-    
+
     @abstractmethod
     def get_manual_config(self, id):
         logging.error("Method not implemented")
+
 
     @abstractmethod
     def get_all_manual_configs(self):
@@ -42,6 +60,7 @@ class FileClient(ABC):
     @abstractmethod
     def save_as_file(self, file_path, filename, content):
         logging.error("Method not implemented")
+
 
     @abstractmethod
     def read_file(self, file_path):

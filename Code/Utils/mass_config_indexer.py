@@ -1,7 +1,6 @@
-import pandas as pd
 import json
-import config
-from elastic_search_client import ElasticSearchClient
+from Code.config import config
+from Code.Clients.elastic_search_client import ElasticSearchClient
 from os import listdir
 from os.path import isfile, join
 
@@ -17,7 +16,7 @@ if __name__ == "__main__":
                 try:
                     #if source["manufacturer_name"] == "Krups":
                     #   continue
-                    es_client.index_config(source["manufacturer_name"], source)
+                    es_client.index_manual_config(source["manufacturer_name"], source)
                 except Exception as e:
                     print(source["manufacturer_name"])
                     print(e)

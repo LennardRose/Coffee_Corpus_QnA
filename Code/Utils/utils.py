@@ -12,9 +12,7 @@ from datetime import datetime, date
 import dateutil
 import unicodedata
 import re
-import logging
-import json
-import config
+from Code.config import config
 import pytz
 from urllib.parse import urljoin, urlparse
 
