@@ -28,7 +28,7 @@ if __name__ == '__main__':
     scraper = ManualScraper()
     parser = ArgumentParserWrapper()
 
-    with open("./manual_sources/aeg.json", "r", encoding='utf-8') as file:
+    with open("./manual_sources/delonghi.json", "r", encoding='utf-8') as file:
         source = json.load(file)
         scraper.scrape(source)
 
