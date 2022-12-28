@@ -8,19 +8,19 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-import utils
+from Code.Utils import utils
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 import re
-import client_factory
+from Code.Clients import client_factory
 import logging
 import ssl
 import os
 from tqdm import tqdm
 import time
-import config
+from Code.config import config
 
 
 class ManualScraper:
@@ -252,7 +252,7 @@ class ManualScraper:
         """
         current_id = None
         try:
-            current_id = client_factory.get_meta_client().index_meta_data(manual_meta_data)
+            current_id = client_factory.get_meta_client().index_manual_metadata(manual_meta_data)
             logging.info("Success -- Saved Metadata")
 
         except Exception as e:
@@ -261,7 +261,7 @@ class ManualScraper:
 
         if current_id:
             try:
-                client_factory.get_file_client().save_as_file(manual_meta_data["filepath"],
+                client_factory.get_file_client().save_as_file(config.MANUALPATH + manual_meta_data["filepath"],
                                                               manual_meta_data["filename"],
                                                               content)
                 logging.info("Success -- Saved content")
@@ -269,7 +269,7 @@ class ManualScraper:
             except Exception as e:
                 logging.error("failed to save Content with file_client")
                 logging.error(e)
-                client_factory.get_meta_client().delete_meta_data(current_id)
+                client_factory.get_meta_client().delete_manual_metadata(current_id)
 
     def _get_request_links(self, url, dictPath, urlKey, layer):
         """
