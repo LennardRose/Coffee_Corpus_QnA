@@ -8,7 +8,7 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from abstract_client import ManualClient, MetaClient
+from Code.Clients.abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
 import elasticsearch

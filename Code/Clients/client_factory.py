@@ -8,8 +8,8 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from hdfs_client import HDFSClient
-from lfs_client import LFSClient
+from Code.Clients.lfs_client import LFSClient
+from Code.Clients.hdfs_client import HDFSClient
 from Code.Clients.abstract_client import *
 from Code.Clients.elastic_search_client import ElasticSearchClient, MockElasticSearchClient
 from Code.config import config

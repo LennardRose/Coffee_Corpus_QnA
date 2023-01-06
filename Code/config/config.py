@@ -121,64 +121,6 @@ corpus_metaIndex = "corpus_meta"
 corpus_metaMapping = {
             "mappings": {
                 "properties": {
-                    "filename": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "filepath": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 512
-                            }
-                        }
-                    },
-                    "language": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "index_time": {
-                        "type": "date",
-                        "format": "yyyy-MM-dd'T'HH:mm:ssZ"
-                    },
-                    "manual_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manual_filename": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manual_filepath": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 512
-                            }
-                        }
-                    },
                     "manufacturer_name": {
                         "type": "text",
                         "fields": {
@@ -197,7 +139,25 @@ corpus_metaMapping = {
                             }
                         }
                     },
-                    "URL": {
+                    "language": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "headerId": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "headerText": {
                         "type": "text",
                         "fields": {
                             "keyword": {
@@ -206,7 +166,16 @@ corpus_metaMapping = {
                             }
                         }
                     },
-                    "source_URL": {
+                    "headerParagraphText": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 2048
+                            }
+                        }
+                    },
+                    "subHeaderId": {
                         "type": "text",
                         "fields": {
                             "keyword": {
@@ -214,7 +183,29 @@ corpus_metaMapping = {
                                 "ignore_above": 256
                             }
                         }
-                    }
+                    },
+                    "SubHeaderText": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                            }
+                        }
+                    },
+                    "subHeaderParagraphText": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 2048
+                            }
+                        }
+                    },
+                    "index_time": {
+                        "type": "date",
+                        "format": "yyyy-MM-dd'T'HH:mm:ssZ"
+                    },
                 }
             }
         }
