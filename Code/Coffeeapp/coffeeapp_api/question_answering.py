@@ -36,36 +36,42 @@ class QuestionAnswerer:
 
 
     def _get_context(self):
-        location_in_filesystem = self._get_corpus_location()
-        corpusfiles = []
-        for location in location_in_filesystem:
-            corpusfiles.append(self._get_corpus(location))
+        docs = self._get_metadata() 
+        
+        # TODO: Docs fitlern nach Paragraph Texten
+        
+        
+        # location_in_filesystem = self._get_corpus_location()
+        # corpusfiles = []
+        # for location in location_in_filesystem:
+        #     corpusfiles.append(self._get_corpus(location))
         return corpusfiles
 
 
-    def _get_corpus_location(self):
-        """
+    # def _get_corpus_location(self):
+    #     """
 
-        returns: a list of all filetpaths
-        """
-        meta_data = self._get_metadata() # TODO checken was ich hier zurück krieg
-        if isinstance(meta_data, collections.Iterable):
-            filepaths = []
-            for m in meta_data:
-                filepaths.append(m["filepath"])
-            return filepaths
-        else:
-            return [meta_data["filepath"]]
+    #     returns: a list of all filetpaths
+    #     """
+    #     meta_data = self._get_metadata() # TODO checken was ich hier zurück krieg
+    #     if isinstance(meta_data, collections.Iterable):
+    #         filepaths = []
+    #         for m in meta_data:
+    #             filepaths.append(m["filepath"])
+    #         return filepaths
+    #     else:
+    #         return [meta_data["filepath"]]
 
 
     def _get_metadata(self):
+        # TODO: Similarity Search
         return client_factory.get_meta_client().get_corpusfile_metadata(self.manufacturer,
                                                                         self.product_name,
                                                                         self.language)
 
 
-    def _get_corpus(self, location):
-        return client_factory.get_file_client().read_file(location)
+    # def _get_corpus(self, location):
+    #     return client_factory.get_file_client().read_file(location)
 
 
     def _get_answers(self, context):

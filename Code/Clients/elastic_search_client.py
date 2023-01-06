@@ -207,6 +207,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
 
         try:
             query = {
+                "size": 10000,
                 "query": {
                     "bool": {
                         "must": []
@@ -214,6 +215,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 }
             }
 
+            
             if manufacturer:
                 query["query"]["bool"]["must"].append({"match": {"manufacturer_name": manufacturer}})
             if product_name:
@@ -226,7 +228,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 # all it learned
                 return None
 
-            docs = self.es_client.count(index=config.corpus_metaIndex, body=query)
+            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
 
             if docs["hits"]["hits"]:
                 return docs["hits"]["hits"]
