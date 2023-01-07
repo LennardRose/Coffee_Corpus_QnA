@@ -41,6 +41,18 @@ class MetaClient(ABC):
     def delete_corpusfile_metadata(self, id):
         logging.error("Method not implemented")
 
+    @abstractmethod
+    def get_manufacturers(self):
+        logging.error("Method not implemented")
+
+    @abstractmethod
+    def get_products_of_manufacturer(self, manufacturer):
+        logging.error("Method not implemented")
+
+    @abstractmethod
+    def get_metadata_of_product(self, manufacturer, product):
+        logging.error("Method not implemented")
+
 
 
 class ManualClient(ABC):
@@ -65,3 +77,5 @@ class FileClient(ABC):
     @abstractmethod
     def read_file(self, file_path):
         logging.error("Method not implemented")
+
+

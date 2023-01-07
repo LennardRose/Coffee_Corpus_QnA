@@ -1,4 +1,5 @@
 import collections
+import pandas as pd
 
 from Code.Clients import client_factory
 import Code.Question_Answering.Question_Answering as QA
@@ -6,11 +7,12 @@ import Code.Question_Answering.Question_Answering as QA
 
 class QuestionAnswerer:
 
-    def __init__(self, language, questions, manufacturer=None, product_name=None):
+    def __init__(self, language, questions, manufacturer=None, product_name=None, max_answers=3):
         self.language = language
         self.product_name = product_name
         self.manufacturer = manufacturer
         self.questions = questions
+        self.max_answers = max_answers
         self.answers = None
         self.errors = None
 
@@ -36,16 +38,18 @@ class QuestionAnswerer:
 
 
     def _get_context(self):
-        docs = self._get_metadata() 
-        
-        # TODO: Docs fitlern nach Paragraph Texten
-        
-        
+        docs = self._get_metadata()
+
+        df = pd.DataFrame(docs)
+        texts = df["headerParagraphText"].unique().tolist()
+        texts.extend(df["subHeaderParagraphText"].unique().tolist())
+        texts = list(filter(None, texts))
+
         # location_in_filesystem = self._get_corpus_location()
         # corpusfiles = []
         # for location in location_in_filesystem:
         #     corpusfiles.append(self._get_corpus(location))
-        return corpusfiles
+        return texts
 
 
     # def _get_corpus_location(self):
@@ -62,7 +66,6 @@ class QuestionAnswerer:
     #     else:
     #         return [meta_data["filepath"]]
 
-
     def _get_metadata(self):
         # TODO: Similarity Search
         return client_factory.get_meta_client().get_corpusfile_metadata(self.manufacturer,
@@ -73,6 +76,7 @@ class QuestionAnswerer:
     # def _get_corpus(self, location):
     #     return client_factory.get_file_client().read_file(location)
 
-
     def _get_answers(self, context):
-        return QA.answer_questions(context, self.questions)
+        answers = QA.answer_questions(context, self.questions)[0:self.max_answers]
+        answers = [answer["answer"] for answer in answers]
+        return answers

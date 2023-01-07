@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Coffeeapp.settings')
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Coffeeapp.settings')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'projectname.settings'
 
 application = get_wsgi_application()

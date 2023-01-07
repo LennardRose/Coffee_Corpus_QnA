@@ -1,4 +1,4 @@
-from preprocessing import Preprocessor
+from Code.Preprocessor.preprocessor import Preprocessor
 import json
 
 

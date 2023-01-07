@@ -1,4 +1,5 @@
 import layoutparser as lp
+import Code.Clients.client_factory as clientfactory
 import time
 import pandas as pd
 import os
@@ -80,51 +81,58 @@ class Preprocessor:
 
         error_files = []
 
-        # TODO hol alle documente/metadaten aus ES
-        for manufacturer in next(os.walk(manuals_path))[1]:
+        # load all manufacturers names
+        manufacturers = clientfactory.get_meta_client().get_manufacturers()
+
+        # loop through all manufacturers
+        for manufacturer in manufacturers:
             time_start_manufacturer = time.time()
             self._model = self._load_model("", manufacturer)
 
             manufacturer_dic = {}
             manufacturer_products = []
 
-            # TODO alle dokumentenpfade aus metadaten suchen
-            subfolder = os.path.join(manuals_path, manufacturer)
-            os.makedirs(os.path.join(self._output_path, manufacturer), exist_ok=True)
+            products = clientfactory.get_meta_client().get_products_of_manufacturer(manufacturer)
+            filepath = os.path.join(self._output_path, manufacturer)
 
             # Second Loop through all Products of Manufacturer
-            for product in next(os.walk(subfolder))[1]:
+            for product in products:
                 product_dic = {}
-                subsubfolder = os.path.join(subfolder, product)
-                out_subsubfolder = os.path.join(self._output_path + manufacturer, product)
-                os.makedirs(out_subsubfolder, exist_ok=True)
 
                 df_list = []
-                pdfs = glob.glob(subsubfolder + "/*.pdf")
 
-                if not len(pdfs):
-                    logger.error(f"No PDFs found in the file path. Skipping - {subsubfolder} -")
+                # get all pdfs of product
+                metadatas = clientfactory.get_meta_client().get_metadata_of_product(manufacturer, product)
+
+                if not len(metadatas):
+                    logger.error(f"No metadata found for product" + str(product))
                     continue
 
                 # Third Loop through all Manuals of Products
-                for file in pdfs:
+                for metadata in metadatas:
                     try:
                         time_start_single = time.time()
-                        logger.info(f"Processing {file}.")
+                        manual_name = metadata["manual_name"]
+                        logger.info(f"Processing {manual_name}.")
 
-                        segmenter = Segmenter(file, self._model)
-                        file_df = segmenter.get_segments_df(self._mode)
+                        # load pdf
+                        pdf_location = metadata["filepath"] + metadata["filename"]
+                        pdf = clientfactory.get_file_client().read_file(pdf_location)
 
-                        file_df = self._filter(file_df)
-                        file_df = self._correct_points(file_df)
+                        # segment
+                        segmenter = Segmenter(pdf, self._model)
+                        pdf_df = segmenter.get_segments_df(self._mode)
 
-                        df_list.append(file_df)
+                        pdf_df = self._filter(pdf_df)
+                        pdf_df = self._correct_points(pdf_df)
+
+                        df_list.append(pdf_df)
                         time_finish_single = time.time()
                         logger.info(
-                            f"Finished processing {file}. - Took {time_finish_single - time_start_single} seconds.")
+                            f"Finished processing {manual_name}. - Took {time_finish_single - time_start_single} seconds.")
                     except:
-                        error_files.append(file)
-                        logger.error(f"Error occured while processing {file} - Skipping this file.")
+                        error_files.append(pdf)
+                        logger.error(f"Error occured while processing {manual_name} - Skipping this file.")
 
                 if len(df_list) == 0:
                     continue
@@ -132,15 +140,19 @@ class Preprocessor:
                 df = pd.concat(df_list, ignore_index=True)
                 df = df[['file', 'language', 'label', 'text']]
 
+
+                # TODO if necessary more metadata can be added here
                 product_object = self._objectify_segments(df)
                 product_dic['product_id'] = product
                 product_dic['languages'] = product_object
                 manufacturer_products.append(product_dic)
 
-                # TODO output als CSV in client abspeichern HDFS/LFS
-                out_csv = out_subsubfolder + f"/{product}_preprocessed.csv"
-                df.to_csv(out_csv)
-                logger.info(f"Saving the output dataframe to {out_csv}")
+
+                # TODO save to ES right here if necessary
+
+                filename = product + "_preprocessed.csv"
+                clientfactory.get_file_client().save_as_file(file_path=filepath, filename=product, content=df.to_csv())
+                logger.info(f"Saving the output dataframe to {filename}")
 
             manufacturer_dic['manufacturer'] = manufacturer
             manufacturer_dic['products'] = manufacturer_products
@@ -152,7 +164,6 @@ class Preprocessor:
         time_finish_all = time.time()
         logger.info(f"Finished processing {len(df_list)} documents. - Took {time_finish_all - time_start_all} seconds.")
 
-        # TODO bis hier
         with open('your_file.txt', 'w') as f:
             for line in error_files:
                 f.write(f"{line}\n")

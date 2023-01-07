@@ -4,7 +4,7 @@
         "Question": "Which products can be dispensed?",
         "Answer": {
             "text": [
-                "? Coffee products\n? Instant products\n? Hot water"
+                "Coffee products\n? Instant products\n? Hot water"
             ],
             "answer_start": [
                 133

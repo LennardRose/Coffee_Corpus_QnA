@@ -8,13 +8,12 @@ from rest_framework.renderers import TemplateHTMLRenderer
 
 
 class CoffeeAppApiView(APIView):
- #   renderer_classes = [TemplateHTMLRenderer]
-  #  template_name = 'home.html'
 
-    # add permission to check if user is authenticated NOPE
-    # permission_classes = [permissions.IsAuthenticated]
+    # uncomment these for beautiful website
+    #renderer_classes = [TemplateHTMLRenderer]
+    #template_name = 'home.html'
 
-    # 1. List all
+
     def get(self, request, *args, **kwargs):
         '''
         maybe all possible manufacturer and models
@@ -26,10 +25,10 @@ class CoffeeAppApiView(APIView):
         ask a question
         '''
 
-        questionanswerer = QuestionAnswerer(request.data.get('manufacturer'),
-                                            request.data.get('product_name'),
-                                            request.data.get('language'),
-                                            request.data.get('questions'))
+        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
+                                            product_name=request.data.get('product_name'),
+                                            language=request.data.get('language'),
+                                            questions=request.data.get('questions'))
 
         if questionanswerer.is_valid():
             questionanswerer.ask()

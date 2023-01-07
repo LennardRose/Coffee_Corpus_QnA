@@ -180,6 +180,114 @@ class ElasticSearchClient(MetaClient, ManualClient):
             return None
 
 
+    def get_manufacturers(self):
+        try:
+            query = {
+                "aggs": {
+                    "manufacturers": {
+                        "terms": {
+                            "field": "manufacturer_name.keyword",
+                            "size": 500
+                        }
+                    }
+                },
+                "size": 0}
+
+            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
+            result = []
+            if docs["aggregations"]["manufacturers"]:
+                for manufacturer in docs["aggregations"]["manufacturers"]["buckets"]:
+                    result.append(manufacturer["key"])
+
+                return result
+
+            else:
+                logging.error("No manufactuers in metadata found")
+        except:
+            return
+
+
+    def get_products_of_manufacturer(self, manufacturer):
+        try:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match_phrase": {
+                                    "manufacturer_name": {
+                                        "query": manufacturer
+
+                                    }
+                                }
+
+                            }]
+                    }
+                },
+
+                "aggs": {
+                    "products": {
+                        "terms": {
+                            "field": "product_name.keyword"
+                        }
+                    }
+
+                },
+                "size": 0}
+
+            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
+            result = []
+            if docs["aggregations"]["products"]:
+                for product in docs["aggregations"]["products"]["buckets"]:
+                    result.append(product["key"])
+
+                return result
+
+            else:
+                logging.error("No products in metadata found")
+        except:
+            return
+
+
+    def get_metadata_of_product(self, manufacturer, product):
+        try:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match_phrase": {
+                                    "manufacturer_name": {
+                                        "query": manufacturer
+                                    }
+                                }
+
+                            },
+                            {
+                                "match_phrase": {
+                                    "product_name": {
+                                        "query": product
+                                    }
+                                }
+                            }]
+                    }
+                }
+            }
+
+            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
+            result = []
+            if docs["hits"]["hits"]:
+                for manual in docs["hits"]["hits"]:
+                    result.append(manual["_source"])
+
+                return result
+
+            else:
+                logging.error("No products in metadata found")
+        except:
+            return
+
+
     def index_corpusfile_metadata(self, corpusfile_metadata):
         """
         index meta data to elasticsearch
@@ -215,13 +323,12 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 }
             }
 
-            
             if manufacturer:
-                query["query"]["bool"]["must"].append({"match": {"manufacturer_name": manufacturer}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer": {"query": manufacturer}}})
             if product_name:
-                query["query"]["bool"]["must"].append({"match": {"product_name": product_name}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"product": {"query": product_name}}})
             if language:
-                query["query"]["bool"]["must"].append({"match": {"language": language}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
 
             if not query["query"]["bool"]["must"]:
                 # return whole corpusfile or tell application to answer based on
@@ -229,16 +336,33 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 return None
 
             docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
-
+            result = []
             if docs["hits"]["hits"]:
-                return docs["hits"]["hits"]
+                for doc in docs["hits"]["hits"]:
+                    result.append(doc["_source"])
+
+                return result
+
             else:
                 logging.error("No corpus for: " + str(query["query"]["bool"]["must"]) + " not found.")
+
         except:
             return None
 
 
 class MockElasticSearchClient(MetaClient, ManualClient):
+
+    def get_metadata_of_product(self, manufacturer, product):
+        pass
+
+
+    def get_manufacturers(self):
+        pass
+
+
+    def get_products_of_manufacturer(self, manufacturer):
+        pass
+
 
     def delete_corpusfile_metadata(self, id):
         pass
