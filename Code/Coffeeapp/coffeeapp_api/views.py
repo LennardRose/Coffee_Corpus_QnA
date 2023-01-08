@@ -28,7 +28,7 @@ class CoffeeAppApiView(APIView):
         questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
                                             product_name=request.data.get('product_name'),
                                             language=request.data.get('language'),
-                                            questions=request.data.get('questions'))
+                                            question=request.data.get('question'))
 
         if questionanswerer.is_valid():
             questionanswerer.ask()
