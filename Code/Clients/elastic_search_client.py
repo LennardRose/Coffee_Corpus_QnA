@@ -183,26 +183,66 @@ class ElasticSearchClient(MetaClient, ManualClient):
     def get_manufacturers(self):
         try:
             query = {
-                "aggs": {
-                    "manufacturers": {
+                "size": 0,
+                    "aggs": {
+                        "manufacturer": {
                         "terms": {
-                            "field": "manufacturer_name.keyword",
+                            "field": "manufacturer.keyword",
                             "size": 500
                         }
                     }
-                },
-                "size": 0}
+                }
+            }
 
-            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
+            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
             result = []
-            if docs["aggregations"]["manufacturers"]:
-                for manufacturer in docs["aggregations"]["manufacturers"]["buckets"]:
+            if docs["aggregations"]["manufacturer"]:
+                for manufacturer in docs["aggregations"]["manufacturer"]["buckets"]:
                     result.append(manufacturer["key"])
 
                 return result
 
             else:
                 logging.error("No manufactuers in metadata found")
+        except:
+            return
+
+    def get_products_of_all_manufacturers(self):
+        try: 
+            query = {
+                  "size": 0,
+                    "aggs": {
+                        "manufacturers": {
+                            "terms": {
+                                "field": "manufacturer.keyword"
+                            },
+                            "aggs": {
+                                "products": {
+                                "terms": {
+                                    "field": "product.keyword"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            
+            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
+            result = []
+            if docs["aggregations"]["manufacturers"]:
+                for manufacturer in docs["aggregations"]["manufacturers"]["buckets"]:
+                    manufacturer_products = {}
+                    manufacturer_products['manufacturer'] = manufacturer['key']
+                    manufacturer_products['products'] = []
+                    
+                    for product in manufacturer["products"]["buckets"]:
+                        manufacturer_products['products'].append(product["key"])
+                         
+                    result.append(manufacturer_products)
+                return result
+
+            else:
+                logging.error("No manufactuer/product in metadata found")
         except:
             return
 
@@ -235,7 +275,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 },
                 "size": 0}
 
-            docs = self.es_client.search(index=config.manuals_metaIndex, body=query)
+            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
             result = []
             if docs["aggregations"]["products"]:
                 for product in docs["aggregations"]["products"]["buckets"]:
@@ -359,6 +399,8 @@ class MockElasticSearchClient(MetaClient, ManualClient):
     def get_manufacturers(self):
         pass
 
+    def get_products_of_all_manufacturers(self):
+        pass
 
     def get_products_of_manufacturer(self, manufacturer):
         pass
