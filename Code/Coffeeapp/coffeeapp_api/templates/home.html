@@ -26,8 +26,34 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
       <p class=""></p>
 </header>
 
-<!-- First Grid -->
 <div class="w3-row-padding w3-padding-64 w3-container w3-center">
+  <h1 class="w3-margin"><b>ASK YOUR QUESTION</b></h1>
+  <form method="post">
+    {% csrf_token %}
+    <label class="w3-xlarge" for="manufacturer_select">What Manufacturer?</label>
+        <select style="width:200px;" name="manufacturer" id="manufacturer_select" onchange="update_products()">
+            <option value="">-----</option>
+        {% for manufacturer in manufacturers %}
+            <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+        {% endfor %}
+        </select>
+    <br>
+    <label class="w3-xlarge" for="product_select">What Model?</label>
+        <select name="product" id="product_select">
+            <option value="">-----</option>
+        {% for product in products_by_manufacturer.manufacturer %}
+            <option value="{{ product }}">{{ product }}</option>
+        {% endfor %}
+        </select>
+    <br>
+    <label class="w3-xlarge" for="question_input">What is your question?</label>
+    <input type="text" style="width:200px;" name="question" id="question">
+    <br>
+    <input class="w3-button w3-black w3-padding-large w3-large w3-margin-top" type="submit" value="Anwer my Question!">
+  </form>
+</div>
+<!-- First Grid -->
+<!-- <div class="w3-row-padding w3-padding-64 w3-container w3-center">
   <h1 class="w3-margin"><b>ASK YOUR QUESTION</b></h1>
   <p class="w3-xlarge">What Manufacturer?</p>
     <select form="hform" style="width:200px;" id="select_manufacturer">
@@ -45,7 +71,21 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
           onclick="ask_question()">
     Anwer my Question!
     </button>
-</div>
+</div> -->
+
+
+{% if answers %}
+  <div align="center">
+    <hr>
+    <h3>Predicted Answers:</h3>
+    <ul>
+    {% for answer in answers %}
+        <p>{{ answer }}</p>
+    {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 
 <!-- Second Grid -->
 <div class="w3-row-padding w3-light-grey w3-container">
@@ -78,3 +118,30 @@ alert(q)
 
 </body>
 </html>
+
+<script>
+  function update_products() {
+    // Get the selected manufacturer
+    var manufacturer_select = document.getElementById("manufacturer_select");
+    var manufacturer = manufacturer_select.options[manufacturer_select.selectedIndex].value;
+
+    // Make an AJAX request to your Django app to retrieve the list of products for the selected manufacturer
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // Update the products dropdown menu with the list of products received in the response
+        var products = JSON.parse(this.responseText);
+        var product_select = document.getElementById("product_select");
+        product_select.innerHTML = "";
+        for (var i = 0; i < products.length; i++) {
+          var product_option = document.createElement("option");
+          product_option.value = products[i];
+          product_option.innerHTML = products[i];
+          product_select.appendChild(product_option);
+        }
+      }
+    };
+    xhttp.open("GET", "/get_products?manufacturer=" + manufacturer, true);
+    xhttp.send();
+  }
+</script>

@@ -228,17 +228,14 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 }
             
             docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
-            result = []
+            result = {}
             if docs["aggregations"]["manufacturers"]:
                 for manufacturer in docs["aggregations"]["manufacturers"]["buckets"]:
-                    manufacturer_products = {}
-                    manufacturer_products['manufacturer'] = manufacturer['key']
-                    manufacturer_products['products'] = []
+                    result[manufacturer['key']] = []
                     
                     for product in manufacturer["products"]["buckets"]:
-                        manufacturer_products['products'].append(product["key"])
+                        result[manufacturer['key']].append(product["key"])
                          
-                    result.append(manufacturer_products)
                 return result
 
             else:
