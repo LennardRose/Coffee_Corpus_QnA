@@ -5,7 +5,52 @@ from rest_framework import status
 from rest_framework import permissions
 from .question_answering import QuestionAnswerer
 from rest_framework.renderers import TemplateHTMLRenderer
+import Code.Clients.client_factory as factory
+from django.http import JsonResponse
 
+
+def home(request):
+    
+    # Retrieve every manufacturer from ES
+    all_manufacturers = factory.get_meta_client().get_manufacturers()
+    
+    # Retrieve every product by manufacturer from ES
+    products_by_manufacturer = factory.get_meta_client().get_products_of_all_manufacturers()
+    
+    if request.method == "POST":
+        # Retrieve answer for question
+        manufacturer = request.POST['manufacturer']
+        product = request.POST['product']
+        question = request.POST['question']
+      
+        questionanswerer = QuestionAnswerer(manufacturer=manufacturer,
+                                            product_name=product,
+                                            language='en',
+                                            question=question)
+      
+      
+        if questionanswerer.is_valid():
+            questionanswerer.ask()
+            
+        return render(request, 'home.html', {
+            'manufacturers': all_manufacturers,
+            'products_by_manufacturer': products_by_manufacturer,
+            'answers': questionanswerer.answers
+            })
+    
+    
+    return render(request, 'home.html', {
+        'manufacturers': all_manufacturers,
+        'products_by_manufacturer': products_by_manufacturer,
+        'answers': None
+        })
+    
+def get_products(request):
+     
+    manufacturer = request.GET.get('manufacturer')
+    products = factory.get_meta_client().get_products_of_manufacturer(manufacturer)
+    
+    return JsonResponse(products, safe=False)
 
 class CoffeeAppApiView(APIView):
 
@@ -28,7 +73,7 @@ class CoffeeAppApiView(APIView):
         questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
                                             product_name=request.data.get('product_name'),
                                             language=request.data.get('language'),
-                                            questions=request.data.get('questions'))
+                                            question=request.data.get('question'))
 
         if questionanswerer.is_valid():
             questionanswerer.ask()

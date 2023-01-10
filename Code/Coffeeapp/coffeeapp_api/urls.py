@@ -14,11 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from .views import (
-    CoffeeAppApiView,
-)
+from . import views
 
 urlpatterns = [
-    path('', CoffeeAppApiView.as_view()),
-    path('api', CoffeeAppApiView.as_view()),
+    path('', views.home),
+    path('get_products/', views.get_products, name='get_products'),
+    path('api/', views.CoffeeAppApiView.as_view()),
 ]

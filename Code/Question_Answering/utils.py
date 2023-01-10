@@ -2,6 +2,8 @@ import json
 import pandas as pd
 import numpy as np
 import os
+import copy
+
 from datasets import Dataset
 from datasets import DatasetDict
 
@@ -22,7 +24,37 @@ def get_data_as_dataset_for_pipe():
     return dataset
 
 
-def read_data():
+def read_data_autotrain():
+    data = read_data(popAnswerEnd=True)
+
+    # filter multiple answers
+    for dic in data:
+        answers = len(dic["answers"]["text"])
+        if answers > 1:
+            for i in range(1, answers):
+                newDic = copy.deepcopy(dic)
+                newDic["answers"]["text"] =  [dic["answers"]["text"][i]]
+                newDic["answers"]["answer_start"] = [dic["answers"]["answer_start"][i]]
+                #newDic["answers"]["answer_end"] = dic["answers"]["answer_end"][i]
+                data.append(newDic)
+
+            dic["answers"]["text"] = [dic["answers"]["text"][0]]
+            dic["answers"]["answer_start"] = [dic["answers"]["answer_start"][0]]
+
+            print(dic["id"])
+        
+        dic["answers"]["answer_start"] = dic["answers"]["answer_start"][0]
+            
+    
+    # convert answer_start to int
+    for dic in data:
+        answers = len(dic["answers"]["text"])
+        if answers > 1:
+            print("alarm")
+
+    return data
+
+def read_data(popAnswerEnd=True):
     json_files = [pos_json for pos_json in os.listdir(basePath) if pos_json.endswith('.json')]
 
     data = []
@@ -32,8 +64,9 @@ def read_data():
 
     formattedData = format_data(data)
 
-    for d in formattedData:
-        d["answers"].pop("answer_end", None)
+    if popAnswerEnd:
+        for d in formattedData:
+            d["answers"].pop("answer_end", None)
 
     return formattedData
 
@@ -99,3 +132,10 @@ def format_data(data):
             formattedData.append(newDic)
 
     return formattedData
+
+
+def convertToAutotrain():
+
+    df_data = pd.DataFrame(read_data_autotrain())
+
+    return df_data
