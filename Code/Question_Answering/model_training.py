@@ -341,13 +341,15 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     gc.collect()
 
-    models = [("deepset/roberta-base-squad2", "deepset/roberta-base-squad2"),  # fine tuned
-            ("distilbert-base-cased-distilled-squad", "distilbert-base-cased-distilled-squad"),  # fine tuned
-            ("distilbert-base-uncased-distilled-squad", "distilbert-base-uncased-distilled-squad")] # fine tuned
-
-    models = [("deepset/bert-base-cased-squad2", "deepset/bert-base-cased-squad2"),
-              ("bert-large-uncased-whole-word-masking-finetuned-squad", "bert-large-uncased-whole-word-masking-finetuned-squad"),
-              ("roberta-base", "roberta-base")]  # fine tuned
-    # , ("nejox/distilbert-base-uncased-coffee20230106", "distilbert-base-uncased")]  # , ,"deepset/bert-base-cased-squad2"]
+    models = [
+        ("deepset/roberta-base-squad2", "deepset/roberta-base-squad2"),  # fine tuned
+        ("distilbert-base-cased-distilled-squad", "distilbert-base-cased-distilled-squad"),  # fine tuned
+        ("distilbert-base-uncased-distilled-squad", "distilbert-base-uncased-distilled-squad"),
+        ("deepset/bert-base-cased-squad2", "deepset/bert-base-cased-squad2"),
+        ("bert-large-uncased-whole-word-masking-finetuned-squad", "bert-large-uncased-whole-word-masking-finetuned-squad"),
+        ("roberta-base", "roberta-base"),
+        ("bert-base-uncased", "bert-base-uncased"),
+        ("bert-base-cased", "bert-base-cased")
+    ]
 
     train_models(models)

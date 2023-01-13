@@ -107,16 +107,28 @@ if __name__ == "__main__":
               ]
     # models finetuned:
     models = [
-        ('nejox/autotrain-mai_nlp_project-2768781885', 'nejox/autotrain-mai_nlp_project-2768781885'),
-        ('nejox/autotrain-nlp_distilbert-2772181933', 'nejox/autotrain-nlp_distilbert-2772181933'),
-        ('nejox/autotrain-nlp_roberta-2771481922', 'nejox/autotrain-nlp_roberta-2771481922'),
+       # ('nejox/autotrain-mai_nlp_project-2768781885', 'nejox/autotrain-mai_nlp_project-2768781885'),
+        #('nejox/autotrain-nlp_distilbert-2772181933', 'nejox/autotrain-nlp_distilbert-2772181933'),
+       # ('nejox/autotrain-nlp_roberta-2771481922', 'nejox/autotrain-nlp_roberta-2771481922'),
         ('nejox/distilbert-base-uncased-distilled-squad-coffee20230108', "distilbert-base-uncased-distilled-squad"),
         ('nejox/distilbert-base-cased-distilled-squad-coffee20230108', "distilbert-base-cased-distilled-squad"),
         ('nejox/roberta-base-squad2-coffee20230108', "deepset/roberta-base-squad2"),
         ('nejox/roberta-base-coffee20230108', 'roberta-base'),
         ('nejox/bert-large-uncased-whole-word-masking-finetuned-squad-coffee20230108',
          "bert-large-uncased-whole-word-masking-finetuned-squad"),
-        ('nejox/bert-base-cased-squad2-coffee20230108', 'deepset/bert-base-cased-squad2')
+        ('nejox/bert-base-cased-squad2-coffee20230108', 'deepset/bert-base-cased-squad2'),
+        ("nejox/bert-base-cased-coffee20230113", "bert-base-cased"),
+        ("nejox/bert-base-uncased-coffee20230113", "bert-base-uncased"),
+    ]
+
+    models = [
+        ("deepset/roberta-base-squad2", "deepset/roberta-base-squad2"),
+        ("distilbert-base-cased-distilled-squad", "distilbert-base-cased-distilled-squad"),
+        ("distilbert-base-uncased-distilled-squad", "distilbert-base-uncased-distilled-squad"),
+        ("deepset/bert-base-cased-squad2", "deepset/bert-base-cased-squad2"),
+        ("roberta-base", "roberta-base"),
+        ("bert-base-uncased", "bert-base-uncased"),
+        ("bert-base-cased", "bert-base-cased")
     ]
 
     results = test_models(models)
