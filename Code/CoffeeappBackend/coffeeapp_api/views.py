@@ -49,3 +49,30 @@ class AnswerApiView(APIView):
         
         
         return JsonResponse({"answer": "bad"}, safe=False)
+    
+    
+class TestAnswerApiView(APIView):
+  
+    def get(self, request, *args, **kwargs):
+        '''
+        maybe all possible manufacturer and models
+        '''
+        return Response({}, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        '''
+        maybe all possible manufacturer and models
+        '''
+        
+        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
+                                            product=request.data.get('product'),
+                                            language=request.data.get('language'),
+                                            question=request.data.get('question'),
+                                            model=CoffeeappApiConfig.model)
+        
+        if questionanswerer.is_valid():
+            questionanswerer.ask()
+            # return JsonResponse(questionanswerer.answers, safe=False)
+            return Response(questionanswerer.answers, status=status.HTTP_200_OK)
+            
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)

@@ -7,7 +7,7 @@ from transformers import pipeline
 
 
 class CoffeeappApiConfig(AppConfig):
+    # Model here, so it is only loaded once
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'coffeeapp_api'
     model = pipeline("question-answering", model="deepset/roberta-base-squad2")
-    print("Model Loaded!")

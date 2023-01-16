@@ -19,5 +19,6 @@ from . import views
 
 urlpatterns = [
     path('getProductsForAllManufacturer/', views.ManufacturerApiView.as_view()),
-    path('getPredictedAnswers/', views.AnswerApiView.as_view())
+    path('getPredictedAnswers/', views.AnswerApiView.as_view()),
+    path('getPredictedAnswersTest/', views.TestAnswerApiView.as_view())
 ]

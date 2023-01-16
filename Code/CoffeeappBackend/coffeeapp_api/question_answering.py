@@ -75,6 +75,7 @@ class QuestionAnswerer:
             List of metadata from one specific manufacturer and product
         """
         # TODO: Similarity Search
+        # TODO: Error Handling, when no/false Data is returned
         return client_factory.get_meta_client().get_corpusfile_metadata(self.manufacturer,
                                                                         self.product,
                                                                         self.language)
