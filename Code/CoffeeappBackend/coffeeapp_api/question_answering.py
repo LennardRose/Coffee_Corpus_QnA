@@ -1,17 +1,19 @@
 import collections
+
 import pandas as pd
+from django.conf import settings
 
 from Code.Clients import client_factory
 
-from django.conf import settings 
 
 class QuestionAnswerer:
 
-    def __init__(self, language, question, manufacturer=None, product_name=None, max_answers=3):
+    def __init__(self, language, question, manufacturer=None, product=None, model=None, max_answers=3):
         self.language = language
-        self.product_name = product_name
+        self.product = product
         self.manufacturer = manufacturer
         self.question = question
+        self.model = model
         self.max_answers = max_answers
         self.answers = None
         self.errors = None
@@ -74,7 +76,7 @@ class QuestionAnswerer:
         """
         # TODO: Similarity Search
         return client_factory.get_meta_client().get_corpusfile_metadata(self.manufacturer,
-                                                                        self.product_name,
+                                                                        self.product,
                                                                         self.language)
 
 
@@ -96,7 +98,7 @@ class QuestionAnswerer:
     
         for paragraph in context:
             
-            result = settings.MODEL(question=self.question, context=paragraph)
+            result = self.model(question=self.question, context=paragraph)
             results.append(result)
 
         results = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
