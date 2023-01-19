@@ -1,6 +1,6 @@
 {
 "settings" : {
-    "number_of_shards": 1,
+    "number_of_shards": 2,
     "number_of_replicas": 1
 },
 
@@ -8,6 +8,10 @@
         "properties": {
             "uid": {"type": "text"},
             "swivel_embedding": {"type":  "dense_vector", "dims":  128},
-            "bert_embedding": {"type": "dense_vector", "dims":  128}
+            "bert_embedding": {"type": "dense_vector", "dims":  256},
+            "sentencet5_embedding": {"type": "dense_vector", "dims":  128},
+            "universal_sentence_embedding": {"type": "dense_vector", "dims":512},
+            "all_mini_embedding": {"type": "dense_vector", "dims":384},
+            "finetuned_all_mini_embedding": {"type": "dense_vector", "dims":384}
         }}
 }
