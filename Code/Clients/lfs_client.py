@@ -19,7 +19,8 @@ class LFSClient(FileClient):
     Saves to local file system
     """
 
-    def save_as_file(self, file_path, filename, content):
+    @classmethod
+    def save_as_file(cls, file_path, filename, content):
         """
         combines the file_path and filename to the location to save the content
         careful it overwrites the file if already present
@@ -34,8 +35,8 @@ class LFSClient(FileClient):
         with open(target, "wb") as file:
             file.write(content)
 
-
-    def read_file(self, file_path):
+    @classmethod
+    def read_file(cls, file_path):
         """
         reads a file from the given file_path, including the filename  and returns it as json
         :param file_path: the path the file, filename included
