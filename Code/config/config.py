@@ -19,6 +19,10 @@ CLIENTS = {
 # -------------------------------LFS---------------------------------------------------
 CONFIG_PATH = "../ManualScraper/manual_sources"
 MANUALPATH = "./manuals/"
+CORPUSPATHS = [ # list of all paths
+    ""
+]
+
 # -------------------------------HDFS---------------------------------------------------
 HDFS_URL = "192.168.0.115"
 HDFS_PORT = "9870"
@@ -27,6 +31,7 @@ HDFS_USER = "hadoop"
 ES_URL = '127.0.0.1'
 ES_PORT = '9200'
 ES_LOG_LEVEL = logging.WARNING
+reindex_corpus = True # flag to execute index on corpus
 manuals_sourceIndex = "manuals_config"
 manuals_sourceMapping = {
 
@@ -175,6 +180,12 @@ corpus_metaMapping = {
                             }
                         }
                     },
+
+                    "ParagraphTextVector": {
+                        "type": "dense_vector",
+                        "dims": 384
+                    },
+                    
                     "subHeaderId": {
                         "type": "text",
                         "fields": {
@@ -201,6 +212,10 @@ corpus_metaMapping = {
                                 "ignore_above": 2048
                             }
                         }
+                    },
+                    "subHeaderParagraphTextVector": {
+                        "type": "dense_vector",
+                        "dims": 512
                     },
                     "index_time": {
                         "type": "date",
