@@ -12,8 +12,13 @@ from Code.Clients.abstract_client import ManualClient, MetaClient
 import logging
 from elasticsearch import Elasticsearch
 import elasticsearch
+from elasticsearch.helpers import bulk
+from lfs_client import LFSClient
+from Code.SimilaritySearch import *
 from Code.Utils import utils
 from Code.config import config
+import json
+import pandas as pd
 
 
 class ElasticSearchClient(MetaClient, ManualClient):
@@ -34,6 +39,11 @@ class ElasticSearchClient(MetaClient, ManualClient):
         self.es_client = Elasticsearch([config.ES_URL + ":" + config.ES_PORT])
         elasticsearch.logger.setLevel(config.ES_LOG_LEVEL)
         self._initialize_indizes_if_not_there()
+        self._embedder = FinetunedAllMiniLMEmbedder()
+
+    @property
+    def embedder(self):
+        return self._embedder
 
 
     def _initialize_indizes_if_not_there(self):
@@ -51,6 +61,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
             self.es_client.indices.create(index=config.manuals_metaIndex, body=config.manuals_metaMapping, ignore=400)
 
         if not self.es_client.indices.exists(index=config.corpus_metaIndex):
+            ### conf.manuals.sourceMapping -> index.json
             logging.info("Index " + config.corpus_metaIndex + " not found, initialize index.")
             self.es_client.indices.create(index=config.manuals_metaIndex, body=config.corpus_metaMapping, ignore=400)
 
@@ -325,14 +336,20 @@ class ElasticSearchClient(MetaClient, ManualClient):
             return
 
 
-    def index_corpusfile_metadata(self, corpusfile_metadata):
+    def index_corpusfile_metadata(self, corpus_file_paths:list):
         """
         index meta data to elasticsearch
+        bulk index of corpus data
         :return: the id of the new indexed meta data
         """
+        embedded_field_name = "ParagraphTextVector"
+        corpus_data = self.get_corpus_data(corpus_file_paths)
+        for sample_data in corpus_data:
+            # this is where we embed the documents
+            embedded_fields = sample_data["ParagraphText"]
+            sample_data[embedded_field_name] = embedded_fields.apply(lambda t: self._embedder.embed_single_text(t)[0].tolist())
 
-        result = self.es_client.index(index=config.corpus_metaIndex, body=corpusfile_metadata,
-                                      doc_type="_doc")
+        result = bulk(self.es_client, corpus_data)
 
         if result["result"] == "created" and result["_id"]:
             return result["_id"]
@@ -346,6 +363,47 @@ class ElasticSearchClient(MetaClient, ManualClient):
         deletes corpus_metadata doc in corpus_metaIndex index
         """
         self.es_client.delete(index=config.corpus_metaIndex, id=id)
+
+    def find_values(self,id, json_object):
+        """
+        finds paragraphText in all the layers of the corpus
+        """
+        results = []
+
+        def _decode_dict(a_dict):
+            try:
+                results.append(a_dict[id])
+            except KeyError:
+                pass
+            return a_dict
+        json.loads(json_object, object_hook=_decode_dict) # Return value ignored.
+        
+        return results
+
+    
+
+    def get_corpus_data(self, file_paths: list):
+        """
+            Extracts the relevant information from
+            corpus
+        :param file_paths: list of paths containing the corpus
+        :return:
+        """
+        corpus_data = []
+        for f_path in file_paths:
+            json_data = LFSClient.read_file(f_path)
+            sample_data = {
+                "manufacturer": json_data["manufacturer"],
+                "product": json_data["product_id"],
+                "language": json_data["languages"],
+                "header_id": json_data["headerId"],
+                "headerText": json_data["headerText"],
+                "ParagraphText": json_data["ParagraphText"],
+                "subHeaderId": json_data["subHeaderId"]
+            }
+            corpus_data.append(sample_data)
+
+        return corpus_data
 
 
     def get_corpusfile_metadata(self, manufacturer, product_name, language):
@@ -414,6 +472,9 @@ class MockElasticSearchClient(MetaClient, ManualClient):
     def get_latest_entry_URL(self, source_URL, region):
         return False
 
+    def get_corpus_data(self, manufacturer, product_id, file_path):
+        pass
+
 
     def delete_manual_metadata(self, id):
         return True
@@ -433,6 +494,9 @@ class MockElasticSearchClient(MetaClient, ManualClient):
 
     def get_corpusfile_metadata(self, manufacturer, product_name, language):
         return True
+
+    def index_corpusfile_metadata(self):
+        pass
 
 
     def index_corpusfile_metadata(self, corpusfile_metadata):
