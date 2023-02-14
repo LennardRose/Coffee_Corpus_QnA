@@ -1,5 +1,6 @@
 from Code.Preprocessor.preprocessor import Preprocessor
 import json
+import Code.Clients.client_factory as factory
 
 
 if __name__ == '__main__':
@@ -9,5 +10,9 @@ if __name__ == '__main__':
     output = pp.process('PATH TO MANUALS')
     
     # save json output to file
-    with open('output_preprocessing/corpus.json', 'w') as fp:
-        json.dump(output, fp, indent=2)
+    factory.get_file_client().save_as_file(file_path='output_preprocessing/',
+                                           filename='corpus.json',
+                                           content=output)
+
+ #   with open('output_preprocessing/corpus.json', 'w') as fp:
+ #       json.dump(output, fp, indent=2)

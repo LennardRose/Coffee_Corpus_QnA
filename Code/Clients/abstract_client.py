@@ -28,31 +28,20 @@ class MetaClient(ABC):
     def delete_manual_metadata(self, id):
         logging.error("Method not implemented")
 
-    @abstractmethod
-    def index_corpusfile_metadata(self, corpusfile_metadata):
-        logging.error("Method not implemented")
-
-    @abstractmethod
-    def get_corpusfile_metadata(self, manufacturer, product_name, language):
-        logging.error("Method not implemented")
-
-
-    @abstractmethod
-    def delete_corpusfile_metadata(self, id):
-        logging.error("Method not implemented")
 
     @abstractmethod
     def get_manufacturers(self):
         logging.error("Method not implemented")
 
+
     @abstractmethod
     def get_products_of_manufacturer(self, manufacturer):
         logging.error("Method not implemented")
 
+
     @abstractmethod
     def get_metadata_of_product(self, manufacturer, product):
         logging.error("Method not implemented")
-
 
 
 class ManualClient(ABC):
@@ -78,4 +67,29 @@ class FileClient(ABC):
     def read_file(self, file_path):
         logging.error("Method not implemented")
 
+
+class ContextClient(ABC):
+    """
+    @abstractmethod
+    def index_context(self, data):
+        logging.error("Method not implemented")
+    """
+    @abstractmethod
+    def search_similar_context(self, question_embedded, manufacturer, product_name, language, n_returns: int):
+        logging.error("Method not implemented")
+
+
+    @abstractmethod
+    def index_context(self, context):
+        logging.error("Method not implemented")
+
+
+    @abstractmethod
+    def get_context(self, manufacturer, product_name, language):
+        logging.error("Method not implemented")
+
+
+    @abstractmethod
+    def delete_context(self, id):
+        logging.error("Method not implemented")
 

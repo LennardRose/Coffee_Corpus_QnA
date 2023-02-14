@@ -1,5 +1,6 @@
 import collections
-
+import logging
+import Code.SimilaritySearch.embedders as embedders
 import pandas as pd
 from django.conf import settings
 
@@ -17,6 +18,8 @@ class QuestionAnswerer:
         self.max_answers = max_answers
         self.answers = None
         self.errors = None
+        self.embedder = embedders.FinetunedAllMiniLMEmbedder()
+        self.n_returns = 100
 
 
     def is_valid(self):
@@ -40,10 +43,14 @@ class QuestionAnswerer:
 
     def ask(self):
         """Entry method for the QuestionAnswerer"""
-        context = self._get_context()
-        print("Received Context and Question!")
-        self.answers = self._get_answers(context)
-        print("Answered Question!")
+        try:
+            context = self._get_context()
+            logging.debug("Received Context and Question!")
+            self.answers = self._get_answers(context)
+            logging.debug("Answered Question!")
+        except Exception:
+            self.errors = Exception
+            return False
 
 
     def _get_context(self):
@@ -55,30 +62,26 @@ class QuestionAnswerer:
         list
             List of paragraphs from one specific manufacturer and product
         """
-        docs = self._get_metadata()
+        embedded_question = self.embedder.embed_single_text(self.question)
 
-        df = pd.DataFrame(docs)
-        texts = df["headerParagraphText"].unique().tolist()
-        texts.extend(df["subHeaderParagraphText"].unique().tolist())
-        texts = list(filter(None, texts))
-        
-        return texts
+        # TODO: If Similarity Search breaks, it does here probably
+        contexts = client_factory.get_context_client().search_similar_context(manufacturer=self.manufacturer,
+                                                                              product_name=self.product,
+                                                                              language=self.language,
+                                                                              question_embedded=embedded_question,
+                                                                              n_returns=self.n_returns)
 
+        if contexts:
+            df = pd.DataFrame(contexts)
+            texts = df["headerParagraphText"].unique().tolist()
+            texts.extend(df["subHeaderParagraphText"].unique().tolist())
+            texts = list(filter(None, texts))
 
-    def _get_metadata(self):
-        """
-        Method that reads the metadata from ES and returns it.
+            return texts
 
-        Returns
-        -------
-        list
-            List of metadata from one specific manufacturer and product
-        """
-        # TODO: Similarity Search
-        # TODO: Error Handling, when no/false Data is returned
-        return client_factory.get_meta_client().get_corpusfile_metadata(self.manufacturer,
-                                                                        self.product,
-                                                                        self.language)
+        else:
+            logging.error("no context retrievable")
+            return None
 
 
     def _get_answers(self, context):
@@ -94,11 +97,10 @@ class QuestionAnswerer:
         list
             List of answers to the question
         """
-        
+
         results = []
-    
+
         for paragraph in context:
-            
             result = self.model(question=self.question, context=paragraph)
             results.append(result)
 
@@ -106,22 +108,3 @@ class QuestionAnswerer:
         answers = [answer["answer"] for answer in results]
 
         return answers
-
-############################### UNUSED #########################################
-
-    # def _get_corpus_location(self):
-    #     """
-    #     returns: a list of all filetpaths
-    #     """
-    #     meta_data = self._get_metadata() 
-    #     if isinstance(meta_data, collections.Iterable):
-    #         filepaths = []
-    #         for m in meta_data:
-    #             filepaths.append(m["filepath"])
-    #         return filepaths
-    #     else:
-    #         return [meta_data["filepath"]]
-    
-
-    # def _get_corpus(self, location):
-    #     return client_factory.get_file_client().read_file(location)

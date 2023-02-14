@@ -14,13 +14,14 @@ WEBDRIVER_FILE = "chromedriver.exe"
 CLIENTS = {
     "META_CLIENT": "elastic",
     "MANUAL_CLIENT": "elastic",
-    "FILE_CLIENT": "lfs"
+    "FILE_CLIENT": "lfs",
+    "CONTEXT_CLIENT": "elastic"
 }
 # -------------------------------LFS---------------------------------------------------
 CONFIG_PATH = "../ManualScraper/manual_sources"
 MANUALPATH = "./manuals/"
 # -------------------------------HDFS---------------------------------------------------
-HDFS_URL = "192.168.0.115"
+HDFS_URL = "127.0.0.1"
 HDFS_PORT = "9870"
 HDFS_USER = "hadoop"
 # -------------------------------ElasticSearch------------------------------------------
@@ -34,179 +35,182 @@ manuals_sourceMapping = {
 
 manuals_metaIndex = "manuals_meta"
 manuals_metaMapping = {
-            "mappings": {
-                "properties": {
-                    "URL": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 512
-                            }
-                        }
-                    },
-                    "filename": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "filepath": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 512
-                            }
-                        }
-                    },
-                    "index_time": {
-                        "type": "date",
-                        "format": "yyyy-MM-dd'T'HH:mm:ssZ"
-                    },
-                    "language": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manual_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "manufacturer_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "product_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "source_URL": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
+    "mappings": {
+        "properties": {
+            "URL": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 512
+                    }
+                }
+            },
+            "filename": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "filepath": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 512
+                    }
+                }
+            },
+            "index_time": {
+                "type": "date",
+                "format": "yyyy-MM-dd'T'HH:mm:ssZ"
+            },
+            "language": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "manual_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "manufacturer_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "product_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "source_URL": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
                     }
                 }
             }
         }
+    }
+}
 
-corpus_metaIndex = "corpus_meta"
+context_index = "context"
 
-corpus_metaMapping = {
-            "mappings": {
-                "properties": {
-                    "manufacturer_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "product_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "language": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "headerId": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "headerText": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 512
-                            }
-                        }
-                    },
-                    "headerParagraphText": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 2048
-                            }
-                        }
-                    },
-                    "subHeaderId": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "SubHeaderText": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "subHeaderParagraphText": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 2048
-                            }
-                        }
-                    },
-                    "index_time": {
-                        "type": "date",
-                        "format": "yyyy-MM-dd'T'HH:mm:ssZ"
-                    },
+context_mapping = {
+    "mappings": {
+        "properties": {
+            "manufacturer_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
                 }
-            }
+            },
+            "product_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "language": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "headerId": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "headerText": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 512
+                    }
+                }
+            },
+            "headerParagraphText": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 2048
+                    }
+                }
+            },
+            "subHeaderId": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "SubHeaderText": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "subHeaderParagraphText": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 2048
+                    }
+                }
+            },
+            "vector_embedding": {
+                "type": "dense_vector",
+                "dims": 1024
+            },
+            "index_time": {
+                "type": "date",
+                "format": "yyyy-MM-dd'T'HH:mm:ssZ"
+            },
         }
-
+    }
+}
