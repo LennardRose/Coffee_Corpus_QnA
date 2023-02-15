@@ -67,3 +67,7 @@ if __name__ == '__main__':
                     if count % batch_size == 0:
                         factory.get_context_client().bulk_index_contexts(docs)
                         docs = []
+
+    if len(docs) != 0:
+        factory.get_context_client().bulk_index_contexts(docs)
+        
