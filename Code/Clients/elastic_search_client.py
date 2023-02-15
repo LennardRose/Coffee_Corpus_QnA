@@ -8,7 +8,7 @@
 #                           SS2022                                  #
 #                                                                   #
 #####################################################################
-from Code.Clients.abstract_client import ManualClient, MetaClient
+from Code.Clients.abstract_client import ManualClient, MetaClient, ContextClient
 import logging
 from elasticsearch import Elasticsearch
 import elasticsearch
@@ -16,7 +16,7 @@ from Code.Utils import utils
 from Code.config import config
 
 
-class ElasticSearchClient(MetaClient, ManualClient):
+class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
     """
     Wrapper Class for the elasticsearch client
     offers all functionality concerning communication with the elasticsearch server
@@ -50,9 +50,9 @@ class ElasticSearchClient(MetaClient, ManualClient):
             logging.info("Index " + config.manuals_metaIndex + " not found, initialize index.")
             self.es_client.indices.create(index=config.manuals_metaIndex, body=config.manuals_metaMapping, ignore=400)
 
-        if not self.es_client.indices.exists(index=config.corpus_metaIndex):
-            logging.info("Index " + config.corpus_metaIndex + " not found, initialize index.")
-            self.es_client.indices.create(index=config.manuals_metaIndex, body=config.corpus_metaMapping, ignore=400)
+        if not self.es_client.indices.exists(index=config.context_index):
+            logging.info("Index " + config.context_index + " not found, initialize index.")
+            self.es_client.indices.create(index=config.context_index, body=config.context_mapping, ignore=400)
 
 
     def delete_manual_metadata(self, id):
@@ -184,8 +184,8 @@ class ElasticSearchClient(MetaClient, ManualClient):
         try:
             query = {
                 "size": 0,
-                    "aggs": {
-                        "manufacturer": {
+                "aggs": {
+                    "manufacturer": {
                         "terms": {
                             "field": "manufacturer.keyword",
                             "size": 500
@@ -194,7 +194,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 }
             }
 
-            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
+            docs = self.es_client.search(index=config.context_index, body=query)
             result = []
             if docs["aggregations"]["manufacturer"]:
                 for manufacturer in docs["aggregations"]["manufacturer"]["buckets"]:
@@ -207,35 +207,36 @@ class ElasticSearchClient(MetaClient, ManualClient):
         except:
             return
 
+
     def get_products_of_all_manufacturers(self):
-        try: 
+        try:
             query = {
-                  "size": 0,
-                    "aggs": {
-                        "manufacturers": {
-                            "terms": {
-                                "field": "manufacturer.keyword"
-                            },
-                            "aggs": {
-                                "products": {
+                "size": 0,
+                "aggs": {
+                    "manufacturers": {
+                        "terms": {
+                            "field": "manufacturer.keyword"
+                        },
+                        "aggs": {
+                            "products": {
                                 "terms": {
                                     "field": "product.keyword"
-                                    }
                                 }
                             }
                         }
                     }
                 }
-            
-            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
+            }
+
+            docs = self.es_client.search(index=config.context_index, body=query)
             result = {}
             if docs["aggregations"]["manufacturers"]:
                 for manufacturer in docs["aggregations"]["manufacturers"]["buckets"]:
                     result[manufacturer['key']] = []
-                    
+
                     for product in manufacturer["products"]["buckets"]:
                         result[manufacturer['key']].append(product["key"])
-                         
+
                 return result
 
             else:
@@ -272,7 +273,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 },
                 "size": 0}
 
-            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
+            docs = self.es_client.search(index=config.context_index, body=query)
             result = []
             if docs["aggregations"]["products"]:
                 for product in docs["aggregations"]["products"]["buckets"]:
@@ -325,30 +326,30 @@ class ElasticSearchClient(MetaClient, ManualClient):
             return
 
 
-    def index_corpusfile_metadata(self, corpusfile_metadata):
+    def index_context(self, context):
         """
         index meta data to elasticsearch
         :return: the id of the new indexed meta data
         """
 
-        result = self.es_client.index(index=config.corpus_metaIndex, body=corpusfile_metadata,
+        result = self.es_client.index(index=config.context_index, body=context,
                                       doc_type="_doc")
 
         if result["result"] == "created" and result["_id"]:
             return result["_id"]
 
         else:
-            raise Exception("corpusfile metadata not created")
+            raise Exception("context not created")
 
 
-    def delete_corpusfile_metadata(self, id):
+    def delete_context(self, id):
         """
         deletes corpus_metadata doc in corpus_metaIndex index
         """
-        self.es_client.delete(index=config.corpus_metaIndex, id=id)
+        self.es_client.delete(index=config.context_index, id=id)
 
 
-    def get_corpusfile_metadata(self, manufacturer, product_name, language):
+    def get_context(self, manufacturer, product_name, language):
 
         try:
             query = {
@@ -372,7 +373,7 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 # all it learned
                 return None
 
-            docs = self.es_client.search(index=config.corpus_metaIndex, body=query)
+            docs = self.es_client.search(index=config.context_index, body=query)
             result = []
             if docs["hits"]["hits"]:
                 for doc in docs["hits"]["hits"]:
@@ -381,7 +382,50 @@ class ElasticSearchClient(MetaClient, ManualClient):
                 return result
 
             else:
-                logging.error("No corpus for: " + str(query["query"]["bool"]["must"]) + " not found.")
+                logging.error("No context for: " + str(query["query"]["bool"]["must"]) + " not found.")
+
+        except:
+            return None
+
+    # TODO not really sure if this is sufficient - check if return is all {n_returns} most similar contexts
+    def search_similar_context(self, question_embedded, manufacturer, product_name, language, n_returns: int):
+        try:
+            query = {
+                "size": n_returns,
+                "query": {
+                    "bool": {
+                        "must": []
+                    }
+                },
+                "script": {
+                    "source": "cosineSimilarity(params.question_embedded, doc['vector_embedding']) + 1.0",
+                    # Add 1.0 because ES doesnt support negative score
+                    "params": {"question_embedded": question_embedded}
+                }
+            }
+
+            if manufacturer:
+                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer": {"query": manufacturer}}})
+            if product_name:
+                query["query"]["bool"]["must"].append({"match_phrase": {"product": {"query": product_name}}})
+            if language:
+                query["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
+
+            if not query["query"]["bool"]["must"]:
+                # return whole corpusfile or tell application to answer based on
+                # all it learned
+                query["query"] = {"match_all": { }}
+
+            docs = self.es_client.search(index=config.context_index, body=query)
+            result = []
+            if docs["hits"]["hits"]:
+                for doc in docs["hits"]["hits"]:
+                    result.append(doc["_source"])
+
+                return result
+
+            else:
+                logging.error("No context for: " + str(query["query"]["bool"]["must"]) + " not found.")
 
         except:
             return None
@@ -396,14 +440,16 @@ class MockElasticSearchClient(MetaClient, ManualClient):
     def get_manufacturers(self):
         pass
 
+
     def get_products_of_all_manufacturers(self):
         pass
+
 
     def get_products_of_manufacturer(self, manufacturer):
         pass
 
 
-    def delete_corpusfile_metadata(self, id):
+    def delete_context(self, id):
         pass
 
 
@@ -431,9 +477,13 @@ class MockElasticSearchClient(MetaClient, ManualClient):
         pass
 
 
-    def get_corpusfile_metadata(self, manufacturer, product_name, language):
+    def get_context(self, manufacturer, product_name, language):
         return True
 
 
-    def index_corpusfile_metadata(self, corpusfile_metadata):
+    def index_context(self, corpusfile_metadata):
         return True
+
+
+    def search_similar_context(self, question_embedded, manufacturer, product_name, language, n_returns: int):
+        pass

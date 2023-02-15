@@ -17,6 +17,7 @@ from Code.config import config
 _file_client = None
 _manual_client = None
 _meta_client = None
+_context_client = None
 
 
 def get_meta_client() -> MetaClient:
@@ -49,9 +50,19 @@ def get_file_client() -> FileClient:
     return _file_client
 
 
+def get_context_client() -> ContextClient:
+    """
+    returns a client for context paragraphs
+    """
+    global _context_client
+    if _context_client is None:
+        _context_client = _read_client_from_config("CONTEXT_CLIENT")
+    return _context_client
+
+
 def _read_client_from_config(client_type):
     """
-    returns an client based on its type and the class as set in the config file
+    returns a client based on its type and the class as set in the config file
     """
     client_name = config.CLIENTS[client_type]
 
