@@ -316,6 +316,7 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
     def bulk_index_contexts(self, docs):
         """
         bulk index contexts to elasticsearch
+        :return: if error counter > 0 return False, else True
         """
         requests = []
         for i, doc in enumerate(docs):
@@ -325,6 +326,8 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
             requests.append(request)
         success, failed = bulk(self.es_client, requests, stats_only=True)
         logging.info("Indexed %d contexts successfully, %d failed" % (success, failed))
+        return failed == 0
+
 
     def index_context(self, context):
         """
