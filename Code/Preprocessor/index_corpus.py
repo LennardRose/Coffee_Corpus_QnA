@@ -32,8 +32,8 @@ if __name__ == '__main__':
                             sh_id = subheader["subHeaderId"]
                             sh_text = subheader["subHeaderText"]
                             sh_paragraph = subheader["paragraphText"]
-                            embedding = embedder.embed_list_text([h_text, h_paragraph, sh_text, sh_paragraph])
-                            embedding2 = embedder2.encode([h_text, h_paragraph, sh_text, sh_paragraph])
+
+                            embedding = embedder.encode([h_text, h_paragraph, sh_text, sh_paragraph])
                             doc = {
                                 "manufacturer": manufacturer,
                                 "product": p_id,
@@ -48,8 +48,7 @@ if __name__ == '__main__':
                             }
 
                     else:
-                        embedding = embedder.embed_list_text([h_text, h_paragraph])
-                        embedding2 = embedder2.encode([h_text, h_paragraph])
+                        embedding = embedder.encode([h_text, h_paragraph])
                         doc = {
                             "manufacturer_name": manufacturer,
                             "product_name": p_id,
