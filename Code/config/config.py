@@ -1,4 +1,4 @@
-# -------------------------------COMMON------------------------------------------
+# -------------------------------COMMON-------------------------------------------------
 import logging
 
 MAX_TRY = 3
@@ -17,9 +17,13 @@ CLIENTS = {
     "FILE_CLIENT": "lfs",
     "CONTEXT_CLIENT": "elastic"
 }
-# -------------------------------LFS---------------------------------------------------
-CONFIG_PATH = "../ManualScraper/manual_sources"
-MANUALPATH = "./manuals/"
+# -------------------------------HuggingFace--------------------------------------------
+QA_MODEL = "nejox/roberta-base-squad2-coffee20230108"
+EMBEDDER = "nejox/all-MiniLM-L6-v2_fine_tuned_coffee"
+# -------------------------------LFS----------------------------------------------------
+CORPUS_PATH = "../Preprocessor/corpus/"
+CONFIG_PATH = "../ManualScraper/manual_sources/"
+MANUAL_PATH = "../ManualScraper/manuals/"
 # -------------------------------HDFS---------------------------------------------------
 HDFS_URL = "127.0.0.1"
 HDFS_PORT = "9870"
@@ -118,7 +122,7 @@ manuals_metaMapping = {
 }
 
 context_index = "context"
-
+EMBEDDING_DIM = 1024  # depends on the embedding model, right?
 context_mapping = {
     "mappings": {
         "properties": {
@@ -205,7 +209,7 @@ context_mapping = {
             },
             "vector_embedding": {
                 "type": "dense_vector",
-                "dims": 1024
+                "dims": EMBEDDING_DIM
             },
             "index_time": {
                 "type": "date",
