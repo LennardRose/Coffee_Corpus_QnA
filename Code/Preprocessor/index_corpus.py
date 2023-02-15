@@ -2,16 +2,15 @@ from sentence_transformers import SentenceTransformer
 import Code.Clients.client_factory as factory
 import json
 from tqdm import tqdm
+from Code.Utils import utils
 from Code.config import config
-from Code.SimilaritySearch.embedders import FinetunedAllMiniLMEmbedder
-
 
 if __name__ == '__main__':
     with open("output_preprocessing/corpus.json") as f:
         corpus = json.load(f)
 
     docs = []
-    batch_size = 1000
+    batch_size = 50
     count = 0
     embedder = SentenceTransformer(config.EMBEDDER)
 
@@ -25,17 +24,19 @@ if __name__ == '__main__':
                     h_id = header["headerId"]
                     h_text = header["headerText"]
                     h_paragraph = header["paragraphText"]
-                    # TODO: filter entries with empty paragraphs etc.
+
                     if header["headerChildren"]:
                         for subheader in header["headerChildren"]:
                             sh_id = subheader["subHeaderId"]
                             sh_text = subheader["subHeaderText"]
                             sh_paragraph = subheader["paragraphText"]
-
+                            if sh_paragraph == "":
+                                # paragraph empty -> just a data corpse?! -> skip
+                                continue
                             embedding = embedder.encode(h_text + " " + h_paragraph + " " + sh_text + " " + sh_paragraph)
                             doc = {
-                                "manufacturer": manufacturer,
-                                "product": p_id,
+                                "manufacturer_name": manufacturer,
+                                "product_name": p_id,
                                 "language": lang,
                                 "headerId": h_id,
                                 "headerText": h_text,
@@ -43,10 +44,14 @@ if __name__ == '__main__':
                                 "subHeaderId": sh_id,
                                 "SubHeaderText": sh_text,
                                 "subHeaderParagraphText": sh_paragraph,
-                                "vector_embedding": embedding
+                                "vector_embedding": embedding,
+                                "index_time":  utils.date_now()
                             }
 
                     else:
+                        if h_paragraph == "":
+                            # paragraph empty and no subheaders -> just a data corpse?! -> skip
+                            continue
                         embedding = embedder.encode(h_text + " " + h_paragraph)
                         doc = {
                             "manufacturer_name": manufacturer,
@@ -58,7 +63,8 @@ if __name__ == '__main__':
                             "subHeaderId": None,
                             "SubHeaderText": None,
                             "subHeaderParagraphText": None,
-                            "vector_embedding": embedding
+                            "vector_embedding": embedding,
+                            "index_time":  utils.date_now()
                         }
 
                     docs.append(doc)
@@ -70,4 +76,3 @@ if __name__ == '__main__':
 
     if len(docs) != 0:
         factory.get_context_client().bulk_index_contexts(docs)
-        
