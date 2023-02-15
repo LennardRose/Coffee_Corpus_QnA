@@ -11,10 +11,9 @@ if __name__ == '__main__':
         corpus = json.load(f)
 
     docs = []
-    batch_size = 10
+    batch_size = 1000
     count = 0
-    embedder = FinetunedAllMiniLMEmbedder()
-    embedder2 = SentenceTransformer(config.EMBEDDER)
+    embedder = SentenceTransformer(config.EMBEDDER)
 
     for entry in tqdm(corpus, "manufacturers"):
         manufacturer = entry["manufacturer"]
@@ -33,7 +32,7 @@ if __name__ == '__main__':
                             sh_text = subheader["subHeaderText"]
                             sh_paragraph = subheader["paragraphText"]
 
-                            embedding = embedder.encode([h_text, h_paragraph, sh_text, sh_paragraph])
+                            embedding = embedder.encode(h_text + " " + h_paragraph + " " + sh_text + " " + sh_paragraph)
                             doc = {
                                 "manufacturer": manufacturer,
                                 "product": p_id,
@@ -48,7 +47,7 @@ if __name__ == '__main__':
                             }
 
                     else:
-                        embedding = embedder.encode([h_text, h_paragraph])
+                        embedding = embedder.encode(h_text + " " + h_paragraph)
                         doc = {
                             "manufacturer_name": manufacturer,
                             "product_name": p_id,
@@ -68,3 +67,7 @@ if __name__ == '__main__':
                     if count % batch_size == 0:
                         factory.get_context_client().bulk_index_contexts(docs)
                         docs = []
+
+    if len(docs) != 0:
+        factory.get_context_client().bulk_index_contexts(docs)
+        

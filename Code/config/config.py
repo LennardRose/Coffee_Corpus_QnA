@@ -122,7 +122,7 @@ manuals_metaMapping = {
 }
 
 context_index = "context"
-EMBEDDING_DIM = 1024  # depends on the embedding model, right?
+EMBEDDING_DIM = 384  # depends on the embedding model, right?
 context_mapping = {
     "mappings": {
         "properties": {
