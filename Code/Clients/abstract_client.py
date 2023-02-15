@@ -78,6 +78,9 @@ class ContextClient(ABC):
     def search_similar_context(self, question_embedded, manufacturer, product_name, language, n_returns: int):
         logging.error("Method not implemented")
 
+    @abstractmethod
+    def bulk_index_contexts(self, docs):
+        logging.error("Method not implemented")
 
     @abstractmethod
     def index_context(self, context):
