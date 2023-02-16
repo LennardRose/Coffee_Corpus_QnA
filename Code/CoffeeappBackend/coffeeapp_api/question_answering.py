@@ -121,8 +121,6 @@ class QuestionAnswerer:
 
         topResults = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
         answers = [answer["answer"] for answer in topResults]
-        logging.info("Answers: " + str(answers))
-        print(f"Answers: {answers}")
 
         conversation = self.question + "\n" + "\n".join(answers)
         # summary = self.summarizer(conversation)[0]["summary_text"]
