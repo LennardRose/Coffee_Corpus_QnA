@@ -32,6 +32,9 @@ HDFS_USER = "hadoop"
 ES_URL = '127.0.0.1'
 ES_PORT = '9200'
 ES_LOG_LEVEL = logging.WARNING
+
+SIM_SEARCH_RETURNS = 50
+
 manuals_sourceIndex = "manuals_config"
 manuals_sourceMapping = {
 

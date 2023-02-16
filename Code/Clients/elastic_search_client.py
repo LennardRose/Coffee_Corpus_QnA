@@ -328,7 +328,6 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
         logging.info("Indexed %d contexts successfully, %d failed" % (success, failed))
         return failed == 0
 
-
     def index_context(self, context):
         """
         index context to elasticsearch
@@ -389,9 +388,10 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
             return None
 
     # TODO not really sure if this is sufficient - check if return is all {n_returns} most similar contexts
-    def search_similar_context(self, question_embedded, manufacturer, product_name, language, n_returns: int):
+    def search_similar_context(self, question_embedded, manufacturer=None, product_name=None, language="en",
+                               n_returns: int = 100):
         try:
-            query = {
+            body = {
                 "size": n_returns,
                 "query": {
                     "bool": {
@@ -399,25 +399,46 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
                     }
                 },
                 "script": {
-                    "source": "cosineSimilarity(params.question_embedded, doc['vector_embedding']) + 1.0",
+                    "source": "cosineSimilarity(params.query_vector, 'vector_embedding') + 1.0",
                     # Add 1.0 because ES doesnt support negative score
-                    "params": {"question_embedded": question_embedded}
+                    "params": {"query_vector": question_embedded}
+                }
+            }
+            script_query = {
+                "script_score": {
+                    "query": {
+                        "bool": {
+                            "must": []
+                        }
+                    },
+                    "script": {
+                        "source": "cosineSimilarity(params.query_vector, 'vector_embedding') + 1.0",
+                        "params": {"query_vector": question_embedded}
+                    }
                 }
             }
 
             if manufacturer:
-                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer_name": {"query": manufacturer}}})
+                script_query["script_score"]["query"]["bool"]["must"].append(
+                    {"match_phrase": {"manufacturer_name": {"query": manufacturer}}})
             if product_name:
-                query["query"]["bool"]["must"].append({"match_phrase": {"product_name": {"query": product_name}}})
+                script_query["script_score"]["query"]["bool"]["must"].append(
+                    {"match_phrase": {"product_name": {"query": product_name}}})
             if language:
-                query["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
+                script_query["script_score"]["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
 
-            if not query["query"]["bool"]["must"]:
+            if not script_query["script_score"]["query"]["bool"]["must"]:
                 # return whole corpusfile or tell application to answer based on
                 # all it learned
-                query["query"] = {"match_all": {}}
+                script_query["script_score"]["query"] = {"match_all": {}}
 
-            docs = self.es_client.search(index=config.context_index, body=query)
+            body = {
+                "size": n_returns,
+                "query": script_query,
+
+            }
+
+            docs = self.es_client.search(index=config.context_index, body=body)
             result = []
             if docs["hits"]["hits"]:
                 for doc in docs["hits"]["hits"]:
@@ -426,9 +447,10 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
                 return result
 
             else:
-                logging.error("No context for: " + str(query["query"]["bool"]["must"]) + " not found.")
+                logging.error("No context for: " + str(body["query"]["bool"]["must"]) + " not found.")
 
-        except:
+        except Exception as e:
+            logging.error(e)
             return None
 
 
