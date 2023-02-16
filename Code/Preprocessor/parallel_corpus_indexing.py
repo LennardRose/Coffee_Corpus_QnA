@@ -76,7 +76,7 @@ def index_manufacturer(entry):
 
     if len(docs) != 0:
         factory.get_context_client().bulk_index_contexts(docs)
-    logging.INFO("Finished indexing manufacturer: " + manufacturer)
+    logging.info("Finished indexing manufacturer: " + manufacturer)
     print("Finished indexing manufacturer: " + manufacturer)
 
 if __name__ == '__main__':

@@ -47,8 +47,8 @@ export class AppComponent {
     this.answersAreLoading$ = this.isLoadingSubject.asObservable();
 
     this.coffeeForm = new FormGroup({
-      manufacturer: new FormControl('', Validators.required),
-      product: new FormControl({value: '', disabled: true}, Validators.required,),
+      manufacturer: new FormControl(''),
+      product: new FormControl({value: '', disabled: true}, ),
       question: new FormControl('', Validators.required),
     });
 
