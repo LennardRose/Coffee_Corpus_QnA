@@ -12,7 +12,7 @@ from Code.config import config
 
 class QuestionAnswerer:
 
-    def __init__(self, language, question, manufacturer=None, product=None, model=None, max_answers=3):
+    def __init__(self, language, question, manufacturer=None, product=None, model=None, max_answers=config.MAX_ANSWERS):
         self.language = language
         self.product = product
         self.manufacturer = manufacturer
@@ -22,6 +22,7 @@ class QuestionAnswerer:
         self.errors = None
         self.qa_model = CoffeeappApiConfig.qa_model
         self.embedder_model = CoffeeappApiConfig.embedder_model
+        self.summarizer = CoffeeappApiConfig.summarizer
         self.n_returns = config.SIM_SEARCH_RETURNS
 
     def is_valid(self):
@@ -109,7 +110,12 @@ class QuestionAnswerer:
                 continue
             results.append(result)
 
-        results = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
-        answers = [answer["answer"] for answer in results]
+        topResults = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
+        answers = [answer["answer"] for answer in topResults]
+        logging.info("Answers: " + str(answers))
 
-        return answers
+        conversation = self.question +"\n" + "\n".join(answers)
+        summary = self.summarizer(conversation)[0]["summary_text"]
+
+        # TODO: return summary and answers
+        return [summary]#, answers

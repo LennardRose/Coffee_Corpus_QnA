@@ -19,6 +19,7 @@ CLIENTS = {
 }
 # -------------------------------HuggingFace--------------------------------------------
 QA_MODEL = "nejox/roberta-base-squad2-coffee20230108"
+MAX_ANSWERS = 5
 EMBEDDER = "nejox/all-MiniLM-L6-v2_fine_tuned_coffee"
 # -------------------------------LFS----------------------------------------------------
 CORPUS_PATH = "../Preprocessor/corpus/"

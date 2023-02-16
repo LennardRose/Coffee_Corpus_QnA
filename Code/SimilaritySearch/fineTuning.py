@@ -50,7 +50,7 @@ if __name__ == '__main__':
     embName = 'all-MiniLM-L6-v2_fine_tuned_coffee'
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-    dataset = load_dataset("json", data_files="training_data.json")
+    dataset = load_dataset("json", data_files="train_data.json")
 
     train_data = dataset['train']['set']
     n_examples = dataset['train'].num_rows
