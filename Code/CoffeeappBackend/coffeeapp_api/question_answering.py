@@ -1,14 +1,16 @@
 import collections
 import logging
 import sys
-#sys.path.append("D:\Programming\master\MAI_NLP_PROJECT")
+# sys.path.append("D:\Programming\master\MAI_NLP_PROJECT")
 # import Code.SimilaritySearch.embedders as embedders
 import pandas as pd
 from django.conf import settings
+import openai
 
 from Code.Clients import client_factory
 from Code.CoffeeappBackend.coffeeapp_api.apps import CoffeeappApiConfig
 from Code.config import config
+
 
 class QuestionAnswerer:
 
@@ -100,6 +102,8 @@ class QuestionAnswerer:
             List of answers to the question
         """
 
+        logging.info("QA Model received " + str(len(context)) + " contexts!")
+
         results = []
         result_answers = []
 
@@ -107,11 +111,11 @@ class QuestionAnswerer:
             result = self.qa_model(question=self.question, context=paragraph)
 
             result_answer = result["answer"].replace(".", "").replace(",", "").lower()
-    
+
             # filter mechanic: to filter answers like "12" or "yes"
             if len(result["answer"]) <= 10 or result_answer in result_answers:
                 continue
-            
+
             result_answers.append(result_answer)
             results.append(result)
 
@@ -120,9 +124,9 @@ class QuestionAnswerer:
         logging.info("Answers: " + str(answers))
         print(f"Answers: {answers}")
 
-        conversation = self.question +"\n" + "\n".join(answers)
+        conversation = self.question + "\n" + "\n".join(answers)
         # summary = self.summarizer(conversation)[0]["summary_text"]
-        
+
         generation = self._generate_answer(self.question, answers)
 
         # TODO: return summary and answers
@@ -131,9 +135,8 @@ class QuestionAnswerer:
             # "summary": summary,
             "generation": generation
         }
-        
-        return answer_object#, answers
 
+        return answer_object  # , answers
 
     def _generate_answer(self, question, answers):
         """Method that generates a new answer based on the answers.
@@ -148,16 +151,13 @@ class QuestionAnswerer:
         str
             Generated answer
         """
-        import openai
-        import time
-        
         openai.api_key = config.KEY
 
         # Write all answers in one string
         answer_string = ""
         for answer in answers:
             answer_string += answer + r"\n"
-        
+
         print(question)
         print(answer_string)
         # Set up the prompt
@@ -176,14 +176,10 @@ class QuestionAnswerer:
             "presence_penalty": 0,
         }
 
-        start = time.process_time()
-
         # Send the API request
         response = openai.Completion.create(**params)
 
-        print(time.process_time() - start)
-
         # Extract the generated text from the response
         generated_text = response.choices[0].text.strip()
-        
+
         return generated_text
