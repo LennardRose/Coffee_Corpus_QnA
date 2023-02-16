@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import Code.Clients.client_factory as factory
-from Code.CoffeeappBackend.coffeeapp_api.apps import CoffeeappApiConfig
 
 from .question_answering import QuestionAnswerer
 
@@ -38,8 +37,7 @@ class AnswerApiView(APIView):
         questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
                                             product=request.data.get('product'),
                                             language=request.data.get('language'),
-                                            question=request.data.get('question'),
-                                            model=CoffeeappApiConfig.model)
+                                            question=request.data.get('question'))
         
         if questionanswerer.is_valid():
             questionanswerer.ask()
@@ -64,11 +62,10 @@ class TestAnswerApiView(APIView):
         maybe all possible manufacturer and models
         '''
         
-        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
-                                            product=request.data.get('product'),
+        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer_name'),
+                                            product=request.data.get('product_name'),
                                             language=request.data.get('language'),
-                                            question=request.data.get('question'),
-                                            model=CoffeeappApiConfig.model)
+                                            question=request.data.get('question'))
         
         if questionanswerer.is_valid():
             questionanswerer.ask()
