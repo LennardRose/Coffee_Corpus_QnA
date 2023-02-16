@@ -7,6 +7,7 @@ from tqdm import tqdm
 from Code.Utils import utils
 from Code.config import config
 from multiprocessing.pool import ThreadPool
+from collections import defaultdict  # available in Python 2.5 and newer
 
 
 def index_manufacturer(entry):
@@ -71,13 +72,17 @@ def index_manufacturer(entry):
                 count += 1
 
                 if count % batch_size == 0:
+                    print("Indexing docs of manufacturer " + str(manufacturer) + ": " + str(len(docs)))
                     factory.get_context_client().bulk_index_contexts(docs)
                     docs = []
 
     if len(docs) != 0:
+        print("Indexing remaining docs of manufacturer " + str(manufacturer) + ": " + str(len(docs)))
         factory.get_context_client().bulk_index_contexts(docs)
-    logging.INFO("Finished indexing manufacturer: " + manufacturer)
-    print("Finished indexing manufacturer: " + manufacturer)
+
+    logging.info("Finished indexing manufacturer: " + str(manufacturer))
+    print("Finished indexing manufacturer: " + str(manufacturer))
+
 
 if __name__ == '__main__':
     with open("output_preprocessing/corpus.json") as f:
@@ -85,3 +90,6 @@ if __name__ == '__main__':
 
     with ThreadPool(10) as pool:
         pool.map(index_manufacturer, corpus)
+
+    logging.info("Finished indexing corpus")
+    print("Finished indexing corpus")
