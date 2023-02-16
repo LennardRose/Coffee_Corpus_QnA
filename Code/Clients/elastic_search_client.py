@@ -178,7 +178,7 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
                 "aggs": {
                     "manufacturer": {
                         "terms": {
-                            "field": "manufacturer.keyword",
+                            "field": "manufacturer_name.keyword",
                             "size": 500
                         }
                     }
@@ -205,12 +205,12 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
                 "aggs": {
                     "manufacturers": {
                         "terms": {
-                            "field": "manufacturer.keyword"
+                            "field": "manufacturer_name.keyword"
                         },
                         "aggs": {
                             "products": {
                                 "terms": {
-                                    "field": "product.keyword"
+                                    "field": "product_name.keyword"
                                 }
                             }
                         }
@@ -363,9 +363,9 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
             }
 
             if manufacturer:
-                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer": {"query": manufacturer}}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer_name": {"query": manufacturer}}})
             if product_name:
-                query["query"]["bool"]["must"].append({"match_phrase": {"product": {"query": product_name}}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"product_name": {"query": product_name}}})
             if language:
                 query["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
 
@@ -406,9 +406,9 @@ class ElasticSearchClient(MetaClient, ManualClient, ContextClient):
             }
 
             if manufacturer:
-                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer": {"query": manufacturer}}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"manufacturer_name": {"query": manufacturer}}})
             if product_name:
-                query["query"]["bool"]["must"].append({"match_phrase": {"product": {"query": product_name}}})
+                query["query"]["bool"]["must"].append({"match_phrase": {"product_name": {"query": product_name}}})
             if language:
                 query["query"]["bool"]["must"].append({"match_phrase": {"language": {"query": language}}})
 
