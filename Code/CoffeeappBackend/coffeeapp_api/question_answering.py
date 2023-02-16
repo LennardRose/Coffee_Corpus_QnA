@@ -101,21 +101,89 @@ class QuestionAnswerer:
         """
 
         results = []
+        result_answers = []
 
         for paragraph in context:
             result = self.qa_model(question=self.question, context=paragraph)
 
+            result_answer = result["answer"].replace(".", "").replace(",", "").lower()
+    
             # filter mechanic: to filter answers like "12" or "yes"
-            if len(result["answer"]) <= 5:
+            if len(result["answer"]) <= 10 or result_answer in result_answers:
                 continue
+            
+            result_answers.append(result_answer)
             results.append(result)
 
         topResults = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
         answers = [answer["answer"] for answer in topResults]
         logging.info("Answers: " + str(answers))
+        print(f"Answers: {answers}")
 
         conversation = self.question +"\n" + "\n".join(answers)
-        summary = self.summarizer(conversation)[0]["summary_text"]
+        # summary = self.summarizer(conversation)[0]["summary_text"]
+        
+        generation = self._generate_answer(self.question, answers)
 
         # TODO: return summary and answers
-        return [summary]#, answers
+        answer_object = {
+            "extracted_answers": answers,
+            # "summary": summary,
+            "generation": generation
+        }
+        
+        return answer_object#, answers
+
+
+    def _generate_answer(self, question, answers):
+        """Method that generates a new answer based on the answers.
+
+        Parameters
+        ----------
+        answers : list
+            List of answers to the question
+
+        Returns
+        -------
+        str
+            Generated answer
+        """
+        import openai
+        import time
+        
+        openai.api_key = config.KEY
+
+        # Write all answers in one string
+        answer_string = ""
+        for answer in answers:
+            answer_string += answer + r"\n"
+        
+        print(question)
+        print(answer_string)
+        # Set up the prompt
+        # prompt = "Write an answer to the user question \"How do I clean the machine?\" about a coffee machine manual  with the following text prompts:\nClean with a damp cloth or sponge.\nWhile cleaning, never immerse the coffee maker in water\nWhile cleaning, never immerse the coffee maker in water.\nremove the plug from the mains.\nClean the body of the coffee machine with a damp cloth or sponge.\n\nIgnore unreasonable prompts"
+        # prompt = "Once upon a time"
+        prompt = "Write an answer to the user question \"" + question + "\" about a coffee machine manual  with the following text prompts:\n" + answer_string + "\n\n"
+
+        # Set up the parameters for the API request
+        params = {
+            "engine": "text-davinci-003",
+            "prompt": prompt,
+            "temperature": 0.7,
+            "max_tokens": 256,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+        }
+
+        start = time.process_time()
+
+        # Send the API request
+        response = openai.Completion.create(**params)
+
+        print(time.process_time() - start)
+
+        # Extract the generated text from the response
+        generated_text = response.choices[0].text.strip()
+        
+        return generated_text

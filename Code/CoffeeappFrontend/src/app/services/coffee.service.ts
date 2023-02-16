@@ -6,6 +6,11 @@ interface ManufacturersWithProducts {
   [manufacturer: string]: string[];
 }
 
+export interface AnswerObject {
+  extracted_answers: string[];
+  generation: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -18,7 +23,7 @@ export class CoffeeService {
     map((products) => (products ? Object.keys(products) : []))
   );
 
-  private currentAnswersSubject = new BehaviorSubject<string[] | null>(null);
+  private currentAnswersSubject = new BehaviorSubject<AnswerObject | null>(null);
   currentAnswers$ = this.currentAnswersSubject.asObservable();
 
   constructor(private http: HttpClient) {
@@ -69,23 +74,32 @@ export class CoffeeService {
     question: string;
   }) {
     // some Mock data for testing
-    // return of([
-    //   ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
-    //   ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
-    //   ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
-    // ]).pipe(
-    //   delay(1000),
-    //   tap(answers => {
-    //     this.currentAnswersSubject.next(answers);
-    //   })
-    // );
+  //   return of({
+  //     extracted_answers:
+  //     [
+  //     ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
+  //     ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
+  //     ' fdujeanudinwa undwhd uwnb duwnudhnwudhnwu bndüuwAN DuiwbnU dnwuaibn duwnüduwnaDwA',
+  //   ], generation: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+  // }).pipe(
+  //     delay(1000),
+  //     tap(answers => {
+  //       this.currentAnswersSubject.next(answers);
+  //     })
+  //   );
 
-    const body = {
-      manufacturer,
-      product,
+    let body: any = {
       question,
       language: 'en',
     };
+
+    if (manufacturer) {
+      body = {...body, manufacturer};
+    }
+
+    if (product) {
+      body = {...body, product};
+    }
 
     return this.http
       .post<any>('http://127.0.0.1:8000/getPredictedAnswers/', body)

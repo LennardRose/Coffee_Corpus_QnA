@@ -12,7 +12,7 @@ import {
   switchMap,
   tap
 } from 'rxjs';
-import {CoffeeService} from './services/coffee.service';
+import {AnswerObject, CoffeeService} from './services/coffee.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +27,7 @@ export class AppComponent {
 
   manufacturers$!: Observable<string[]>;
   products$!: Observable<string[]>;
-  answers$!: Observable<string[] | null>;
+  answerObject$!: Observable<AnswerObject | null>;
 
   private isLoadingSubject!: BehaviorSubject<boolean>;
 
@@ -62,7 +62,7 @@ export class AppComponent {
 
     this.manufacturers$ = this.coffeeService.manufacturers$;
 
-    this.answers$ = this.coffeeService.currentAnswers$;
+    this.answerObject$ = this.coffeeService.currentAnswers$;
 
     this.products$ = this.manufacturerControl!.valueChanges.pipe(
       tap(manufacturer => {

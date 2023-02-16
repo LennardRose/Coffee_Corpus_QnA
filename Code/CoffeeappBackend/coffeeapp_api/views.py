@@ -1,5 +1,5 @@
 import sys
-
+sys.path.append("D:\Programming\master\MAI_NLP_PROJECT")
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import permissions, status
@@ -62,8 +62,8 @@ class TestAnswerApiView(APIView):
         maybe all possible manufacturer and models
         '''
         
-        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer_name'),
-                                            product=request.data.get('product_name'),
+        questionanswerer = QuestionAnswerer(manufacturer=request.data.get('manufacturer'),
+                                            product=request.data.get('product'),
                                             language=request.data.get('language'),
                                             question=request.data.get('question'))
         

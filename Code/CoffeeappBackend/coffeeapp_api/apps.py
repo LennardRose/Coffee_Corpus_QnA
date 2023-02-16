@@ -1,5 +1,5 @@
 import sys
-sys.path.append("C:/Users/jochen/MAI_NLP_PROJECT")
+sys.path.append("D:\Programming\master\MAI_NLP_PROJECT")
 import logging
 from django.apps import AppConfig
 

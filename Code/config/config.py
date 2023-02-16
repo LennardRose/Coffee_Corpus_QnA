@@ -36,6 +36,8 @@ ES_LOG_LEVEL = logging.WARNING
 
 SIM_SEARCH_RETURNS = 50
 
+KEY = "KEY"
+
 manuals_sourceIndex = "manuals_config"
 manuals_sourceMapping = {
 
