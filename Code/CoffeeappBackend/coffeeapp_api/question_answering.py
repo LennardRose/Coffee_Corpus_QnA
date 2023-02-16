@@ -1,10 +1,13 @@
 import collections
 import logging
-import Code.SimilaritySearch.embedders as embedders
+import sys
+sys.path.append("D:\Programming\master\MAI_NLP_PROJECT")
+# import Code.SimilaritySearch.embedders as embedders
 import pandas as pd
 from django.conf import settings
 
 from Code.Clients import client_factory
+from Code.CoffeeappBackend.coffeeapp_api.apps import CoffeeappApiConfig
 
 
 class QuestionAnswerer:
@@ -14,11 +17,11 @@ class QuestionAnswerer:
         self.product = product
         self.manufacturer = manufacturer
         self.question = question
-        self.model = model
         self.max_answers = max_answers
         self.answers = None
         self.errors = None
-        self.embedder = embedders.FinetunedAllMiniLMEmbedder()
+        self.qa_model = CoffeeappApiConfig.qa_model
+        self.embedder_model = CoffeeappApiConfig.embedder_model
         self.n_returns = 100
 
 
@@ -62,7 +65,8 @@ class QuestionAnswerer:
         list
             List of paragraphs from one specific manufacturer and product
         """
-        embedded_question = self.embedder.embed_single_text(self.question)
+        embedded_question = self.embedder_model.encode(self.question)
+        logging.debug("Embedded Question!")
 
         # TODO: If Similarity Search breaks, it does here probably
         contexts = client_factory.get_context_client().search_similar_context(manufacturer=self.manufacturer,
@@ -101,7 +105,7 @@ class QuestionAnswerer:
         results = []
 
         for paragraph in context:
-            result = self.model(question=self.question, context=paragraph)
+            result = self.qa_model(question=self.question, context=paragraph)
             results.append(result)
 
         results = sorted(results, key=lambda k: k['score'], reverse=True)[0:self.max_answers]
