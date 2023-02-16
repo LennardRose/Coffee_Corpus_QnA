@@ -156,8 +156,6 @@ class QuestionAnswerer:
         for answer in answers:
             answer_string += answer + r"\n"
 
-        print(question)
-        print(answer_string)
         # Set up the prompt
         # prompt = "Write an answer to the user question \"How do I clean the machine?\" about a coffee machine manual  with the following text prompts:\nClean with a damp cloth or sponge.\nWhile cleaning, never immerse the coffee maker in water\nWhile cleaning, never immerse the coffee maker in water.\nremove the plug from the mains.\nClean the body of the coffee machine with a damp cloth or sponge.\n\nIgnore unreasonable prompts"
         # prompt = "Once upon a time"
