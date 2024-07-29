@@ -1,4 +1,27 @@
-# MAI_NLP_PROJECT
+# Question Answering System
+
+Comprehensive Question Answering System for Technical Documents (Coffee Machines in this implementation). 
+
+## Poster
+![](Documentation_presentation/Poster.PNG?raw=true)
+
+## Paper
+
+![](Documentation_presentation/Question_Answering_Paper/0001.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0002.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0003.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0004.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0005.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0006.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0007.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0008.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0009.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0010.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0011.png?raw=true)
+![](Documentation_presentation/Question_Answering_Paper/0012.png?raw=true)
+
+
+## Installation
 
 Make sure to have ElasticSearch running with the added metadata of the corpus.
 
