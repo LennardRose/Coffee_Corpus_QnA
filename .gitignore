@@ -35,6 +35,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.idea/
 .idea/*.iml 
 .idea/*.xml
 # PyInstaller
